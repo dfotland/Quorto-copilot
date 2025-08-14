@@ -5,7 +5,7 @@ import Piece, { type PieceAttributes } from './components/Piece';
 import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine } from './utils/gameUtils';
 import './App.css';
 
-type GamePhase = 'select' | 'place';
+type GamePhase = 'place' | 'give';
 type Player = 1 | 2;
 type GameState = 'playing' | 'won' | 'tie';
 
@@ -26,7 +26,11 @@ function App() {
   
   // Track current player and game phase
   const [currentPlayer, setCurrentPlayer] = useState<Player>(1);
-  const [gamePhase, setGamePhase] = useState<GamePhase>('select');
+  const [gamePhase, setGamePhase] = useState<GamePhase>('give');
+  
+  // AI controls
+  const [player1AI, setPlayer1AI] = useState<boolean>(false);
+  const [player2AI, setPlayer2AI] = useState<boolean>(false);
   
   // Track game state
   const [gameState, setGameState] = useState<GameState>('playing');
@@ -44,10 +48,56 @@ function App() {
     }
   }, [board, currentPlayer, gamePhase]);
 
+  // Handle AI moves
+  useEffect(() => {
+    const currentAI = currentPlayer === 1 ? player1AI : player2AI;
+    
+    const executeAIMove = () => {
+      console.log(`AI executing move: Player ${currentPlayer}, Phase: ${gamePhase}, AI enabled: ${currentAI}`);
+      
+      if (gamePhase === 'give') {
+        // AI selects a piece for the opponent
+        if (availablePieces.length > 0) {
+          const randomPiece = availablePieces[Math.floor(Math.random() * availablePieces.length)];
+          console.log(`AI Player ${currentPlayer} selecting piece:`, randomPiece);
+          handlePieceSelect(randomPiece);
+        }
+      } else if (gamePhase === 'place' && stagedPiece) {
+        // AI places the piece on a random empty position
+        console.log(`AI Player ${currentPlayer} placing piece:`, stagedPiece);
+        const emptyPositions = [];
+        for (let row = 0; row < 4; row++) {
+          for (let col = 0; col < 4; col++) {
+            if (board[row][col] === null) {
+              emptyPositions.push({ row, col });
+            }
+          }
+        }
+        
+        if (emptyPositions.length > 0) {
+          const randomPosition = emptyPositions[Math.floor(Math.random() * emptyPositions.length)];
+          handleCellClick(randomPosition.row, randomPosition.col);
+        }
+      }
+    };
+    
+    if (gameState === 'playing' && currentAI) {
+      // Delay AI move slightly for better UX
+      const timeoutId = setTimeout(() => {
+        executeAIMove();
+      }, 1200); // Increased delay to see the piece selection
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [currentPlayer, gamePhase, gameState, player1AI, player2AI, availablePieces, stagedPiece, board]);
+
   const handlePieceSelect = (piece: PieceAttributes) => {
-    if (gamePhase === 'select' && gameState === 'playing') {
-      // Immediately move selected piece to staging area
+    if (gamePhase === 'give' && gameState === 'playing') {
+      console.log(`handlePieceSelect: Player ${currentPlayer} selecting piece for Player ${currentPlayer === 1 ? 2 : 1}`);
+      
+      // Move selected piece to staging area
       setStagedPiece(piece);
+      console.log(`Staged piece set:`, piece);
       
       // Remove piece from available pieces
       const newAvailablePieces = availablePieces.filter(
@@ -55,11 +105,12 @@ function App() {
       );
       setAvailablePieces(newAvailablePieces);
       
-      // Clear selection and switch to place phase
+      // Clear selection and switch to next player's place phase
       setSelectedPiece(null);
+      setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
       setGamePhase('place');
       
-      console.log(`Player ${currentPlayer} selected piece for Player ${currentPlayer === 1 ? 2 : 1} to place`);
+      console.log(`Turn switched to Player ${currentPlayer === 1 ? 2 : 1}, phase: place`);
     }
   };
 
@@ -74,14 +125,13 @@ function App() {
       // Clear staged piece
       setStagedPiece(null);
       
-      // Switch to next player and select phase
-      setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
-      setGamePhase('select');
+      // Switch to give phase (same player selects piece for opponent)
+      setGamePhase('give');
       
-      console.log(`Player ${currentPlayer === 1 ? 2 : 1} placed piece at row ${row}, column ${col}`);
+      console.log(`Player ${currentPlayer} placed piece at row ${row}, column ${col}`);
     } else if (board[row][col]) {
       console.log(`Cell at row ${row}, column ${col} is already occupied`);
-    } else if (gamePhase === 'select') {
+    } else if (gamePhase === 'give') {
       console.log(`Player ${currentPlayer} must first select a piece for the opponent`);
     } else if (gameState !== 'playing') {
       console.log(`Game is over`);
@@ -96,7 +146,7 @@ function App() {
     setSelectedPiece(null);
     setStagedPiece(null);
     setCurrentPlayer(1);
-    setGamePhase('select');
+    setGamePhase('give'); // First player starts by giving a piece
     setGameState('playing');
     setWinner(null);
     setWinningLine(null);
@@ -107,10 +157,10 @@ function App() {
       return `🎉 Player ${winner} Wins! 🎉`;
     } else if (gameState === 'tie') {
       return `🤝 It's a Tie! 🤝`;
-    } else if (gamePhase === 'select') {
+    } else if (gamePhase === 'give') {
       return `Player ${currentPlayer}: Select a piece for Player ${currentPlayer === 1 ? 2 : 1} to place`;
     } else {
-      return `Player ${currentPlayer === 1 ? 2 : 1}: Place the selected piece on the board`;
+      return `Player ${currentPlayer}: Place the selected piece on the board`;
     }
   };
 
@@ -143,9 +193,32 @@ function App() {
               </button>
             </div>
             
+            <div className="ai-controls">
+              <div className="ai-player">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={player1AI}
+                    onChange={(e) => setPlayer1AI(e.target.checked)}
+                  />
+                  Player 1 AI
+                </label>
+              </div>
+              <div className="ai-player">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={player2AI}
+                    onChange={(e) => setPlayer2AI(e.target.checked)}
+                  />
+                  Player 2 AI
+                </label>
+              </div>
+            </div>
+            
             <div className="game-info">
               <p>Pieces placed: {16 - availablePieces.length}/16</p>
-              <p>Game phase: {gameState === 'playing' ? (gamePhase === 'select' ? 'Piece Selection' : 'Piece Placement') : 'Finished'}</p>
+              <p>Game phase: {gameState === 'playing' ? (gamePhase === 'give' ? 'Piece Selection' : 'Piece Placement') : 'Finished'}</p>
             </div>
           </div>
         </div>
@@ -161,7 +234,7 @@ function App() {
           
           {/* Staging Area */}
           <div className="staging-area">
-            <h3>Piece for Opponent</h3>
+            <h3>Piece for {currentPlayer === 1 ? 'Player 1' : 'Player 2'}</h3>
             <div className={`staging-circle ${gameState !== 'playing' ? 'disabled' : ''}`}>
               {stagedPiece ? (
                 <div className="staged-piece">

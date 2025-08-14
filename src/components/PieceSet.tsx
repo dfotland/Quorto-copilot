@@ -6,7 +6,7 @@ interface PieceSetProps {
   availablePieces: PieceAttributes[];
   selectedPiece: PieceAttributes | null;
   onPieceSelect: (piece: PieceAttributes) => void;
-  gamePhase?: 'select' | 'place';
+  gamePhase?: 'give' | 'place';
   gameOver?: boolean;
 }
 
@@ -14,7 +14,7 @@ const PieceSet: React.FC<PieceSetProps> = ({
   availablePieces, 
   selectedPiece, 
   onPieceSelect,
-  gamePhase = 'select',
+  gamePhase = 'give',
   gameOver = false
 }) => {
   const isPieceSelected = (piece: PieceAttributes) => {
@@ -27,7 +27,7 @@ const PieceSet: React.FC<PieceSetProps> = ({
     );
   };
 
-  const canSelectPieces = gamePhase === 'select' && !gameOver;
+  const canSelectPieces = gamePhase === 'give' && !gameOver;
 
   return (
     <div className="piece-set">
