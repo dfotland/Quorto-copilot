@@ -4,6 +4,7 @@ import PieceSet from './components/PieceSet';
 import Piece, { type PieceAttributes } from './components/Piece';
 import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine } from './utils/gameUtils';
 import './App.css';
+import { NeuralNetworkDemo } from './neural/NeuralNetworkDemo';
 
 type GamePhase = 'place' | 'give';
 type Player = 1 | 2;
@@ -164,6 +165,12 @@ function App() {
     }
   };
 
+  const runNeuralNetworkDemo = () => {
+    console.clear();
+    NeuralNetworkDemo.runDemo();
+    NeuralNetworkDemo.benchmarkPerformance();
+  };
+
   return (
     <div className="app">
       <h1>Quarto Game</h1>
@@ -179,18 +186,8 @@ function App() {
           
           <div className="game-controls">
             <div className="current-player">
-              <h3 className={gameState !== 'playing' ? 'game-over-title' : ''}>
-                {gameState === 'playing' ? `Current Turn: Player ${currentPlayer}` : 'Game Over'}
-              </h3>
-              <p className={`game-status ${gameState !== 'playing' ? 'game-over-status' : ''}`}>
-                {getGameStatusMessage()}
-              </p>
-            </div>
-            
-            <div className="game-buttons">
-              <button onClick={startNewGame} className="new-game-button">
-                {gameState === 'playing' ? 'New Game' : 'Play Again'}
-              </button>
+              <h3>{gameState === 'won' ? 'Game Over!' : gameState === 'tie' ? 'Game Over!' : `Current Player: ${currentPlayer}`}</h3>
+              <p className={gameState !== 'playing' ? 'game-over-status' : ''}>{getGameStatusMessage()}</p>
             </div>
             
             <div className="ai-controls">
@@ -215,12 +212,32 @@ function App() {
                 </label>
               </div>
             </div>
+
+            <div className="game-buttons">
+              <button 
+                onClick={startNewGame}
+                className="new-game-button"
+              >
+                {gameState === 'playing' ? 'New Game' : 'Play Again'}
+              </button>
+              <button 
+                onClick={runNeuralNetworkDemo}
+                className="demo-button"
+              >
+                🧠 Neural Net Demo
+              </button>
+            </div>
             
             <div className="game-info">
               <p>Pieces placed: {16 - availablePieces.length}/16</p>
-              <p>Game phase: {gameState === 'playing' ? (gamePhase === 'give' ? 'Piece Selection' : 'Piece Placement') : 'Finished'}</p>
+              <p>Phase: {gamePhase === 'give' ? 'Select piece' : 'Place piece'}</p>
             </div>
           </div>
+          
+          {/* <div className="debug-info">
+            <h4>Debug Info</h4>
+            <pre>{JSON.stringify({ board, availablePieces, stagedPiece, selectedPiece, currentPlayer, gamePhase, gameState, winner, winningLine }, null, 2)}</pre>
+          </div> */}
         </div>
         
         <div className="piece-selection-area">

@@ -173,6 +173,25 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.demo-button {
+  background: #6f42c1;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.demo-button:hover {
+  background: #5a32a3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .game-controls {
   display: flex;
   flex-direction: column;
