@@ -1,0 +1,140 @@
+/* Base piece styles */
+.piece {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: default;
+  position: relative;
+}
+
+.piece-clickable {
+  cursor: pointer;
+}
+
+.piece-clickable:hover {
+  transform: scale(1.1);
+}
+
+.piece-selected {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+/* Size variations */
+.piece-small {
+  width: 40px;
+  height: 40px;
+}
+
+.piece-medium {
+  width: 50px;
+  height: 50px;
+}
+
+.piece-large {
+  width: 60px;
+  height: 60px;
+}
+
+/* Piece body */
+.piece-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Height variations */
+.piece-tall .piece-body {
+  height: 100%;
+}
+
+.piece-short .piece-body {
+  height: 70%;
+}
+
+/* Shape variations - Square pieces */
+.piece-square .piece-body {
+  width: 80%;
+  background-color: currentColor;
+  border-radius: 4px;
+}
+
+.piece-square .piece-top {
+  width: 100%;
+  height: 30%;
+  border-radius: 2px;
+}
+
+/* Shape variations - Round pieces */
+.piece-round .piece-body {
+  width: 80%;
+  background-color: currentColor;
+  border-radius: 50%;
+}
+
+.piece-round .piece-top {
+  width: 60%;
+  height: 30%;
+  border-radius: 50%;
+}
+
+/* Color variations */
+.piece-light {
+  color: #F5DEB3; /* Wheat color */
+}
+
+.piece-dark {
+  color: #8B4513; /* Saddle brown */
+}
+
+/* Top variations */
+.piece-solid .piece-top {
+  background-color: currentColor;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.piece-hollow .piece-top {
+  background-color: transparent;
+  border: 3px solid currentColor;
+  box-sizing: border-box;
+}
+
+/* Special styling for hollow pieces */
+.piece-hollow.piece-square .piece-body {
+  border: 3px solid currentColor;
+  background-color: transparent;
+  box-sizing: border-box;
+}
+
+.piece-hollow.piece-round .piece-body {
+  border: 3px solid currentColor;
+  background-color: transparent;
+  box-sizing: border-box;
+}
+
+/* Ensure proper positioning */
+.piece-top {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Add some visual depth */
+.piece-body::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  z-index: -1;
+}

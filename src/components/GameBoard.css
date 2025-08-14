@@ -1,0 +1,93 @@
+.game-board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+}
+
+.game-board h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 6px;
+  padding: 15px;
+  background-color: #8B4513;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.board-cell {
+  width: 60px;
+  height: 60px;
+  background-color: #D2B48C;
+  border: 2px solid #8B4513;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.board-cell:hover {
+  background-color: #DEB887;
+  border-color: #A0522D;
+  transform: scale(1.05);
+}
+
+.cell-circle {
+  width: 45px;
+  height: 45px;
+  border: 3px solid #8B4513;
+  border-radius: 50%;
+  background-color: transparent;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.board-cell.winning-cell {
+  background-color: #FFD700 !important;
+  border-color: #FFA500 !important;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  animation: winningPulse 1.5s infinite;
+}
+
+.board-cell.winning-cell:hover {
+  background-color: #FFD700 !important;
+  transform: none !important;
+}
+
+.board-cell.game-over {
+  cursor: default;
+}
+
+.board-cell.game-over:hover {
+  background-color: #D2B48C;
+  border-color: #8B4513;
+  transform: none;
+}
+
+@keyframes winningPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 1);
+  }
+}
