@@ -3,21 +3,27 @@ import { MCTSSearch, createGameStateFromApp, defaultMCTSConfig, type MCTSConfig,
 
 // Enhanced AI that can use MCTS for move selection
 export class MCTSAIPlayer {
-  private mcts: MCTSSearch;
-  private config: MCTSConfig;
-
-  constructor(config: Partial<MCTSConfig> = {}) {
-    this.config = { ...defaultMCTSConfig, ...config };
-    this.mcts = new MCTSSearch(this.config);
-  }
-
-  // Get best move using MCTS (returns place, give tuple)
+  // Get best move using MCTS with configurable parameters
   getBestMove(
     board: (PieceAttributes | null)[][],
     availablePieces: PieceAttributes[],
     stagedPiece: PieceAttributes | null,
-    currentPlayer: 1 | 2
+    currentPlayer: 1 | 2,
+    config: Partial<MCTSConfig> = {}
   ): Move {
+    // For the first move (no staged piece), just return a random piece
+    if (!stagedPiece) {
+      return { 
+        place: null,
+        give: availablePieces[Math.floor(Math.random() * availablePieces.length)],
+        value: 0
+      };
+    }
+
+    // Merge provided config with defaults
+    const mctsConfig = { ...defaultMCTSConfig, ...config };
+    const mcts = new MCTSSearch(mctsConfig);
+    
     const gameState = createGameStateFromApp(
       board,
       availablePieces,
@@ -27,78 +33,32 @@ export class MCTSAIPlayer {
       null
     );
 
-    const bestMove = this.mcts.search(gameState);
+    const bestMove = mcts.search(gameState);
     
     if (bestMove.place !== undefined || bestMove.give !== undefined) {
       return bestMove;
     }
 
-    // Fallback logic
-    if (stagedPiece) {
-      // Regular play: place piece and give next piece
-      const emptyPositions: [number, number][] = [];
-      for (let row = 0; row < 4; row++) {
-        for (let col = 0; col < 4; col++) {
-          if (!board[row][col]) {
-            emptyPositions.push([row, col]);
-          }
+    // Fallback logic for regular play (placing piece and giving next piece)
+    const emptyPositions: [number, number][] = [];
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        if (!board[row][col]) {
+          emptyPositions.push([row, col]);
         }
       }
-      const randomPlace = emptyPositions[Math.floor(Math.random() * emptyPositions.length)];
-      const randomGive = availablePieces.length > 0 
-        ? availablePieces[Math.floor(Math.random() * availablePieces.length)]
-        : null;
-      return { 
-        place: randomPlace,
-        give: randomGive,
-        value: 0
-      };
-    } else {
-      // First move: no piece to place, just give a piece
-      return { 
-        place: null,
-        give: availablePieces[Math.floor(Math.random() * availablePieces.length)],
-        value: 0
-      };
     }
-  }
-
-  // Update MCTS configuration
-  updateConfig(newConfig: Partial<MCTSConfig>): void {
-    this.config = { ...this.config, ...newConfig };
-    this.mcts = new MCTSSearch(this.config);
-  }
-
-  // Get current configuration
-  getConfig(): MCTSConfig {
-    return { ...this.config };
+    const randomPlace = emptyPositions[Math.floor(Math.random() * emptyPositions.length)];
+    const randomGive = availablePieces.length > 0 
+      ? availablePieces[Math.floor(Math.random() * availablePieces.length)]
+      : null;
+    return { 
+      place: randomPlace,
+      give: randomGive,
+      value: 0
+    };
   }
 }
-
-// Factory functions for different AI difficulty levels
-export const createEasyMCTSAI = (): MCTSAIPlayer => {
-  return new MCTSAIPlayer({
-    maxIterations: 100,
-    maxDepth: 5,
-    playoutDepth: 10
-  });
-};
-
-export const createMediumMCTSAI = (): MCTSAIPlayer => {
-  return new MCTSAIPlayer({
-    maxIterations: 500,
-    maxDepth: 10,
-    playoutDepth: 20
-  });
-};
-
-export const createHardMCTSAI = (): MCTSAIPlayer => {
-  return new MCTSAIPlayer({
-    maxIterations: 2000,
-    maxDepth: 15,
-    playoutDepth: 30
-  });
-};
 
 // Example usage function that shows how to integrate with existing AI
 export function enhanceExistingAI(
@@ -106,6 +66,7 @@ export function enhanceExistingAI(
   availablePieces: PieceAttributes[],
   stagedPiece: PieceAttributes | null,
   currentPlayer: 1 | 2,
+  config: Partial<MCTSConfig> = {},
   useMCTS: boolean = true
 ): Move | null {
   
@@ -114,6 +75,6 @@ export function enhanceExistingAI(
     return null;
   }
 
-  const mctsAI = createMediumMCTSAI();
-  return mctsAI.getBestMove(board, availablePieces, stagedPiece, currentPlayer);
+  const mctsAI = new MCTSAIPlayer();
+  return mctsAI.getBestMove(board, availablePieces, stagedPiece, currentPlayer, config);
 }

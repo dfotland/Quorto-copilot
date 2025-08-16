@@ -27,6 +27,7 @@ class MCTSNode {
   visits: number;
   wins: number;
   untriedMoves: Move[];
+  depth: number;
 
   constructor(state: GameState, move: Move | null = null, parent: MCTSNode | null = null) {
     this.state = state;
@@ -36,6 +37,7 @@ class MCTSNode {
     this.visits = 0;
     this.wins = 0;
     this.untriedMoves = this.getLegalMoves(state);
+    this.depth = parent ? parent.depth + 1 : 0;
   }
 
   // Get all legal moves from current state
@@ -297,7 +299,7 @@ export class MCTSSearch {
       let node = this.select(root);
       
       // Expansion (if not terminal and within depth limit)
-      if (!node.isTerminal() && node.visits > 0 && this.getDepth(node) < this.config.maxDepth) {
+      if (!node.isTerminal() && node.visits > 0 && node.depth < this.config.maxDepth) {
         if (!node.isFullyExpanded()) {
           node = node.expand();
         }
@@ -531,16 +533,6 @@ export class MCTSSearch {
     return newState;
   }
 
-  private getDepth(node: MCTSNode): number {
-    let depth = 0;
-    let current = node;
-    while (current.parent) {
-      depth++;
-      current = current.parent;
-    }
-    return depth;
-  }
-
   // Public method to get search statistics
   getSearchStats(root: MCTSNode): {
     totalVisits: number;
@@ -553,16 +545,16 @@ export class MCTSSearch {
       avgBranchingFactor: 0
     };
 
-    const calculateStats = (node: MCTSNode, depth: number) => {
-      stats.maxDepth = Math.max(stats.maxDepth, depth);
+    const calculateStats = (node: MCTSNode) => {
+      stats.maxDepth = Math.max(stats.maxDepth, node.depth);
       
       if (node.children.length > 0) {
         stats.avgBranchingFactor += node.children.length;
-        node.children.forEach(child => calculateStats(child, depth + 1));
+        node.children.forEach(child => calculateStats(child));
       }
     };
 
-    calculateStats(root, 0);
+    calculateStats(root);
     
     return stats;
   }
