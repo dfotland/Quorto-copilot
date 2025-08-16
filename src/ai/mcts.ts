@@ -15,6 +15,7 @@ export interface GameState {
 export interface Move {
   place: [number, number] | null; // Position to place staged piece (null for first move)
   give: PieceAttributes | null;   // Piece to give to opponent (null for final move)
+  value: number;                  // Evaluation score for this move (higher is better)
 }
 
 // MCTS Node
@@ -53,11 +54,15 @@ class MCTSNode {
             // For each empty position, generate moves with each available piece to give
             if (state.availablePieces.length > 0) {
               for (const piece of state.availablePieces) {
-                moves.push({ place: [row, col], give: piece });
+                const move = { place: [row, col] as [number, number], give: piece, value: 0 };
+                move.value = this.evaluateMove(state, move);
+                moves.push(move);
               }
             } else {
               // Final move of game - no piece to give
-              moves.push({ place: [row, col], give: null });
+              const move = { place: [row, col] as [number, number], give: null, value: 0 };
+              move.value = this.evaluateMove(state, move);
+              moves.push(move);
             }
           }
         }
@@ -65,11 +70,96 @@ class MCTSNode {
     } else {
       // First move: no piece to place, just choose piece to give
       for (const piece of state.availablePieces) {
-        moves.push({ place: null, give: piece });
+        const move = { place: null, give: piece, value: 0 };
+        move.value = this.evaluateMove(state, move);
+        moves.push(move);
       }
     }
 
     return moves;
+  }
+
+  // Evaluate a move and return its value (higher is better)
+  private evaluateMove(state: GameState, move: Move): number {
+    let value = 0;
+
+    // Evaluate placement position (if placing a piece)
+    if (move.place && state.stagedPiece) {
+      const [row, col] = move.place;
+      
+      // Center positions are generally better (small bonus)
+      const centerDistance = Math.abs(row - 1.5) + Math.abs(col - 1.5);
+      value += (3 - centerDistance) * 0.1;
+      
+      // Check if this placement wins the game (huge bonus)
+      const testBoard = state.board.map(r => [...r]);
+      testBoard[row][col] = state.stagedPiece;
+      if (checkWinCondition(testBoard)) {
+        value += 1000; // Winning move gets highest priority
+      }
+    }
+
+    // Evaluate piece giving (if giving a piece)
+    if (move.give) {
+      // Avoid giving pieces that allow opponent to win (huge penalty)
+      if (this.isPieceDangerous(move.give, state)) {
+        value -= 500; // Dangerous pieces get large penalty
+      }
+      
+      // Slightly prefer giving pieces that limit opponent's options
+      value += this.calculatePieceDefensiveValue(move.give, state);
+    }
+
+    return value;
+  }
+
+  // Calculate defensive value of giving a piece (higher means safer to give)
+  private calculatePieceDefensiveValue(piece: PieceAttributes, state: GameState): number {
+    let value = 0;
+    
+    // Count how many positions this piece could be placed without creating threats
+    let safePositions = 0;
+    let totalPositions = 0;
+    
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        if (!state.board[row][col]) {
+          totalPositions++;
+          const testBoard = state.board.map(r => [...r]);
+          testBoard[row][col] = piece;
+          
+          // Check if placing here creates any threat for us
+          if (!checkWinCondition(testBoard)) {
+            safePositions++;
+          }
+        }
+      }
+    }
+    
+    // Prefer pieces that have fewer winning placements for opponent
+    if (totalPositions > 0) {
+      value = (safePositions / totalPositions) * 0.2;
+    }
+    
+    return value;
+  }
+
+  // Check if giving a piece would allow opponent to win
+  private isPieceDangerous(piece: PieceAttributes, state: GameState): boolean {
+    // Try placing piece on each empty position
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        if (!state.board[row][col]) {
+          const testBoard = state.board.map(r => [...r]);
+          testBoard[row][col] = piece;
+          
+          if (checkWinCondition(testBoard)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   // Check if node is fully expanded
@@ -174,22 +264,11 @@ class MCTSNode {
   }
 }
 
-// Move sorting strategies
-export const MoveSortStrategy = {
-  RANDOM: 'random',
-  CENTER_FIRST: 'center_first',
-  CORNERS_FIRST: 'corners_first',
-  DEFENSIVE: 'defensive'
-} as const;
-
-export type MoveSortStrategy = typeof MoveSortStrategy[keyof typeof MoveSortStrategy];
-
 // MCTS Configuration
 export interface MCTSConfig {
   maxIterations: number;
   maxDepth: number;
   explorationConstant: number;
-  moveSortStrategy: MoveSortStrategy;
   playoutDepth: number; // Max depth for random playouts
 }
 
@@ -198,7 +277,6 @@ export const defaultMCTSConfig: MCTSConfig = {
   maxIterations: 1000,
   maxDepth: 20,
   explorationConstant: Math.sqrt(2),
-  moveSortStrategy: MoveSortStrategy.CENTER_FIRST,
   playoutDepth: 50
 };
 
@@ -257,7 +335,7 @@ export class MCTSSearch {
       const moves = this.getLegalMoves(currentState);
       if (moves.length === 0) break;
       
-      const sortedMoves = this.sortMoves(moves, currentState);
+      const sortedMoves = this.sortMoves(moves);
       const randomMove = sortedMoves[Math.floor(Math.random() * Math.min(3, sortedMoves.length))]; // Slightly biased toward better moves
       
       currentState = this.applyMoveToState(currentState, randomMove);
@@ -275,84 +353,74 @@ export class MCTSSearch {
   }
 
   // Sort moves according to strategy
-  private sortMoves(moves: Move[], state: GameState): Move[] {
-    const sorted = [...moves];
-    
-    switch (this.config.moveSortStrategy) {
-      case MoveSortStrategy.CENTER_FIRST:
-        return this.sortMovesCenterFirst(sorted);
+  private sortMoves(moves: Move[]): Move[] {
+    // Simply sort by value (higher values first)
+    return moves.sort((a, b) => b.value - a.value);
+  }
+
+  // Evaluate a move and return its value (higher is better)
+  private evaluateMove(state: GameState, move: Move): number {
+    let value = 0;
+
+    // Evaluate placement position (if placing a piece)
+    if (move.place && state.stagedPiece) {
+      const [row, col] = move.place;
       
-      case MoveSortStrategy.CORNERS_FIRST:
-        return this.sortMovesCornerFirst(sorted);
+      // Center positions are generally better (small bonus)
+      const centerDistance = Math.abs(row - 1.5) + Math.abs(col - 1.5);
+      value += (3 - centerDistance) * 0.1;
       
-      case MoveSortStrategy.DEFENSIVE:
-        return this.sortMovesDefensive(sorted, state);
-      
-      case MoveSortStrategy.RANDOM:
-      default:
-        return this.shuffleArray(sorted);
+      // Check if this placement wins the game (huge bonus)
+      const testBoard = state.board.map(r => [...r]);
+      testBoard[row][col] = state.stagedPiece;
+      if (checkWinCondition(testBoard)) {
+        value += 1000; // Winning move gets highest priority
+      }
     }
+
+    // Evaluate piece giving (if giving a piece)
+    if (move.give) {
+      // Avoid giving pieces that allow opponent to win (huge penalty)
+      if (this.isPieceDangerous(move.give, state)) {
+        value -= 500; // Dangerous pieces get large penalty
+      }
+      
+      // Slightly prefer giving pieces that limit opponent's options
+      value += this.calculatePieceDefensiveValue(move.give, state);
+    }
+
+    return value;
   }
 
-  // Sort placing moves with center positions first
-  private sortMovesCenterFirst(moves: Move[]): Move[] {
-    return moves.sort((a, b) => {
-      // First sort by place position (if both have places)
-      if (a.place && b.place) {
-        const centerDistance = (pos: [number, number]) => {
-          const [row, col] = pos;
-          return Math.abs(row - 1.5) + Math.abs(col - 1.5);
-        };
-        
-        const placeDiff = centerDistance(a.place) - centerDistance(b.place);
-        if (placeDiff !== 0) return placeDiff;
+  // Calculate defensive value of giving a piece (higher means safer to give)
+  private calculatePieceDefensiveValue(piece: PieceAttributes, state: GameState): number {
+    let value = 0;
+    
+    // Count how many positions this piece could be placed without creating threats
+    let safePositions = 0;
+    let totalPositions = 0;
+    
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 4; col++) {
+        if (!state.board[row][col]) {
+          totalPositions++;
+          const testBoard = state.board.map(r => [...r]);
+          testBoard[row][col] = piece;
+          
+          // Check if placing here creates any threat for us
+          if (!checkWinCondition(testBoard)) {
+            safePositions++;
+          }
+        }
       }
-      
-      // If places are equal or one doesn't have place, sort by piece safety
-      if (a.give && b.give) {
-        return 0; // Keep original order for pieces for now
-      }
-      
-      return 0;
-    });
-  }
-
-  // Sort placing moves with corner positions first
-  private sortMovesCornerFirst(moves: Move[]): Move[] {
-    return moves.sort((a, b) => {
-      // First sort by place position (if both have places)
-      if (a.place && b.place) {
-        const isCorner = (pos: [number, number]) => {
-          const [row, col] = pos;
-          return (row === 0 || row === 3) && (col === 0 || col === 3);
-        };
-        
-        const aIsCorner = isCorner(a.place);
-        const bIsCorner = isCorner(b.place);
-        
-        if (aIsCorner && !bIsCorner) return -1;
-        if (!aIsCorner && bIsCorner) return 1;
-      }
-      
-      return 0;
-    });
-  }
-
-  // Sort moves defensively (prefer safe places and safe pieces to give)
-  private sortMovesDefensive(moves: Move[], state: GameState): Move[] {
-    return moves.sort((a, b) => {
-      // Sort by piece safety when giving pieces
-      if (a.give && b.give) {
-        const aDangerous = this.isPieceDangerous(a.give, state);
-        const bDangerous = this.isPieceDangerous(b.give, state);
-        
-        if (aDangerous && !bDangerous) return 1;
-        if (!aDangerous && bDangerous) return -1;
-      }
-      
-      // Could add place-based defensive logic here too
-      return 0;
-    });
+    }
+    
+    // Prefer pieces that have fewer winning placements for opponent
+    if (totalPositions > 0) {
+      value = (safePositions / totalPositions) * 0.2;
+    }
+    
+    return value;
   }
 
   // Check if giving a piece would allow opponent to win
@@ -387,11 +455,15 @@ export class MCTSSearch {
             // For each empty position, generate moves with each available piece to give
             if (state.availablePieces.length > 0) {
               for (const piece of state.availablePieces) {
-                moves.push({ place: [row, col], give: piece });
+                const move = { place: [row, col] as [number, number], give: piece, value: 0 };
+                move.value = this.evaluateMove(state, move);
+                moves.push(move);
               }
             } else {
               // Final move of game - no piece to give
-              moves.push({ place: [row, col], give: null });
+              const move = { place: [row, col] as [number, number], give: null, value: 0 };
+              move.value = this.evaluateMove(state, move);
+              moves.push(move);
             }
           }
         }
@@ -399,7 +471,9 @@ export class MCTSSearch {
     } else {
       // First move: no piece to place, just choose piece to give
       for (const piece of state.availablePieces) {
-        moves.push({ place: null, give: piece });
+        const move = { place: null, give: piece, value: 0 };
+        move.value = this.evaluateMove(state, move);
+        moves.push(move);
       }
     }
 
@@ -465,15 +539,6 @@ export class MCTSSearch {
       current = current.parent;
     }
     return depth;
-  }
-
-  private shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
   }
 
   // Public method to get search statistics

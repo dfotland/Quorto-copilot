@@ -1,5 +1,5 @@
 import { type PieceAttributes } from '../components/Piece';
-import { MCTSSearch, createGameStateFromApp, defaultMCTSConfig, MoveSortStrategy, type MCTSConfig, type Move } from './mcts';
+import { MCTSSearch, createGameStateFromApp, defaultMCTSConfig, type MCTSConfig, type Move } from './mcts';
 
 // Enhanced AI that can use MCTS for move selection
 export class MCTSAIPlayer {
@@ -50,13 +50,15 @@ export class MCTSAIPlayer {
         : null;
       return { 
         place: randomPlace,
-        give: randomGive
+        give: randomGive,
+        value: 0
       };
     } else {
       // First move: no piece to place, just give a piece
       return { 
         place: null,
-        give: availablePieces[Math.floor(Math.random() * availablePieces.length)] 
+        give: availablePieces[Math.floor(Math.random() * availablePieces.length)],
+        value: 0
       };
     }
   }
@@ -78,7 +80,6 @@ export const createEasyMCTSAI = (): MCTSAIPlayer => {
   return new MCTSAIPlayer({
     maxIterations: 100,
     maxDepth: 5,
-    moveSortStrategy: MoveSortStrategy.RANDOM,
     playoutDepth: 10
   });
 };
@@ -87,7 +88,6 @@ export const createMediumMCTSAI = (): MCTSAIPlayer => {
   return new MCTSAIPlayer({
     maxIterations: 500,
     maxDepth: 10,
-    moveSortStrategy: MoveSortStrategy.CENTER_FIRST,
     playoutDepth: 20
   });
 };
@@ -96,7 +96,6 @@ export const createHardMCTSAI = (): MCTSAIPlayer => {
   return new MCTSAIPlayer({
     maxIterations: 2000,
     maxDepth: 15,
-    moveSortStrategy: MoveSortStrategy.DEFENSIVE,
     playoutDepth: 30
   });
 };
