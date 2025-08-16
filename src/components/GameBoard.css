@@ -73,6 +73,28 @@
   transform: none !important;
 }
 
+.board-cell.last-move-cell .cell-circle {
+  border-color: #DC143C !important;
+  background-color: rgba(220, 20, 60, 0.1);
+  box-shadow: 0 0 15px rgba(220, 20, 60, 0.6);
+  animation: lastMovePulse 2s ease-in-out;
+}
+
+@keyframes lastMovePulse {
+  0% {
+    box-shadow: 0 0 15px rgba(220, 20, 60, 0.6);
+    border-width: 3px;
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(220, 20, 60, 0.9);
+    border-width: 4px;
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(220, 20, 60, 0.6);
+    border-width: 3px;
+  }
+}
+
 .board-cell.game-over {
   cursor: default;
 }

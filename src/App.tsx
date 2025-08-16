@@ -37,6 +37,7 @@ function App() {
   const [gameState, setGameState] = useState<GameState>('playing');
   const [winner, setWinner] = useState<Player | null>(null);
   const [winningLine, setWinningLine] = useState<[number, number][] | null>(null);
+  const [lastMove, setLastMove] = useState<[number, number] | null>(null);
 
   // Check for win condition after each move
   useEffect(() => {
@@ -86,7 +87,7 @@ function App() {
       // Delay AI move slightly for better UX
       const timeoutId = setTimeout(() => {
         executeAIMove();
-      }, 1200); // Increased delay to see the piece selection
+      }, 100); // Quick delay for smoother UX
       
       return () => clearTimeout(timeoutId);
     }
@@ -123,6 +124,9 @@ function App() {
       newBoard[row][col] = stagedPiece;
       setBoard(newBoard);
       
+      // Track the last move position
+      setLastMove([row, col]);
+      
       // Clear staged piece
       setStagedPiece(null);
       
@@ -151,6 +155,7 @@ function App() {
     setGameState('playing');
     setWinner(null);
     setWinningLine(null);
+    setLastMove(null); // Reset last move highlighting
   };
 
   const getGameStatusMessage = () => {
@@ -182,6 +187,7 @@ function App() {
             board={board} 
             winningLine={winningLine}
             gameOver={gameState !== 'playing'}
+            lastMove={lastMove}
           />
           
           <div className="game-controls">
