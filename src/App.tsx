@@ -211,7 +211,7 @@ function App() {
       
       console.log(`✅ STEP 2 COMPLETE - Piece given, switched to Player ${currentPlayer === 1 ? 2 : 1} in place phase`);
     } else {
-      console.log(`❌ STEP 2 FAILED - No piece to give (this shouldn't happen for AI moves)`);
+      console.log(`🏁 STEP 2 SKIPPED - No piece to give (game ending move)`);
     }
     
     console.log(`🎯 ======= AI COMPLETE MOVE FINISHED =======\n`);
