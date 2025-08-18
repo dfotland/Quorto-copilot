@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import GameBoard from './components/GameBoard';
 import PieceSet from './components/PieceSet';
 import Piece, { type PieceAttributes } from './components/Piece';
-import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine } from './utils/gameUtils';
+import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine, formatPieceForLogging } from './utils/gameUtils';
+import { MCTSSearch, createGameStateFromApp, type MCTSConfig, defaultMCTSConfig } from './ai/mcts';
+import { makeAIMove, type AIInput } from './ai';
 import './App.css';
 import { NeuralNetworkDemo } from './neural/NeuralNetworkDemo';
 
@@ -32,12 +34,21 @@ function App() {
   // AI controls
   const [player1AI, setPlayer1AI] = useState<boolean>(false);
   const [player2AI, setPlayer2AI] = useState<boolean>(false);
+  const [aiType, setAiType] = useState<'basic' | 'mcts'>('basic');
+  
+  // MCTS Configuration
+  const [mctsConfig, setMctsConfig] = useState<MCTSConfig>(defaultMCTSConfig);
   
   // Track game state
   const [gameState, setGameState] = useState<GameState>('playing');
   const [winner, setWinner] = useState<Player | null>(null);
   const [winningLine, setWinningLine] = useState<[number, number][] | null>(null);
   const [lastMove, setLastMove] = useState<[number, number] | null>(null);
+
+  // Ref to prevent duplicate AI executions
+  const executionCountRef = useRef(0);
+  const lastExecutionKeyRef = useRef('');
+  const pendingExecutionRef = useRef(false);
 
   // Check for win condition after each move
   useEffect(() => {
@@ -49,49 +60,6 @@ function App() {
       setGameState('tie');
     }
   }, [board, currentPlayer, gamePhase]);
-
-  // Handle AI moves
-  useEffect(() => {
-    const currentAI = currentPlayer === 1 ? player1AI : player2AI;
-    
-    const executeAIMove = () => {
-      console.log(`AI executing move: Player ${currentPlayer}, Phase: ${gamePhase}, AI enabled: ${currentAI}`);
-      
-      if (gamePhase === 'give') {
-        // AI selects a piece for the opponent
-        if (availablePieces.length > 0) {
-          const randomPiece = availablePieces[Math.floor(Math.random() * availablePieces.length)];
-          console.log(`AI Player ${currentPlayer} selecting piece:`, randomPiece);
-          handlePieceSelect(randomPiece);
-        }
-      } else if (gamePhase === 'place' && stagedPiece) {
-        // AI places the piece on a random empty position
-        console.log(`AI Player ${currentPlayer} placing piece:`, stagedPiece);
-        const emptyPositions = [];
-        for (let row = 0; row < 4; row++) {
-          for (let col = 0; col < 4; col++) {
-            if (board[row][col] === null) {
-              emptyPositions.push({ row, col });
-            }
-          }
-        }
-        
-        if (emptyPositions.length > 0) {
-          const randomPosition = emptyPositions[Math.floor(Math.random() * emptyPositions.length)];
-          handleCellClick(randomPosition.row, randomPosition.col);
-        }
-      }
-    };
-    
-    if (gameState === 'playing' && currentAI) {
-      // Delay AI move slightly for better UX
-      const timeoutId = setTimeout(() => {
-        executeAIMove();
-      }, 100); // Quick delay for smoother UX
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [currentPlayer, gamePhase, gameState, player1AI, player2AI, availablePieces, stagedPiece, board]);
 
   const handlePieceSelect = (piece: PieceAttributes) => {
     if (gamePhase === 'give' && gameState === 'playing') {
@@ -156,7 +124,181 @@ function App() {
     setWinner(null);
     setWinningLine(null);
     setLastMove(null); // Reset last move highlighting
+    
+    // Reset AI execution tracking
+    executionCountRef.current = 0;
+    lastExecutionKeyRef.current = '';
+    pendingExecutionRef.current = false;
   };
+
+  // Execute AI move based on current AI type
+  const executeAIMove = () => {
+    if (gameState !== 'playing') return;
+
+    const isCurrentPlayerAI = (currentPlayer === 1 && player1AI) || (currentPlayer === 2 && player2AI);
+    if (!isCurrentPlayerAI) return;
+
+    const formatPieceForDisplay = (piece: PieceAttributes | null) => {
+      if (!piece) return 'null';
+      return formatPieceForLogging(piece);
+    };
+
+    console.log(`🎯 ======= AI MOVE START =======`);
+    console.log(`🎯 AI (Player ${currentPlayer}) executing move in phase: ${gamePhase}`);
+    console.log(`🎯 Staged piece available: ${formatPieceForDisplay(stagedPiece)} ${stagedPiece ? `(height:${stagedPiece.height}, color:${stagedPiece.color}, shape:${stagedPiece.shape}, top:${stagedPiece.top})` : ''}`);
+    console.log(`🎯 Available pieces count: ${availablePieces.length}`);
+
+    let aiMove;
+    if (aiType === 'basic') {
+      aiMove = executeBasicAIMove();
+    } else if (aiType === 'mcts') {
+      aiMove = executeMCTSMove();
+    }
+
+    // Apply the AI move to the game state
+    if (aiMove) {
+      applyAIMove(aiMove);
+    }
+  };
+
+  // Apply an AI move to the game state
+  const applyAIMove = (aiMove: { placement?: { row: number; col: number } | null; pieceToGive?: PieceAttributes | null }) => {
+    console.log(`🔧 Applying AI complete move:`, {
+      placement: aiMove.placement,
+      pieceToGive: aiMove.pieceToGive,
+      currentGamePhase: gamePhase,
+      hasStagedPiece: !!stagedPiece
+    });
+
+    // STEP 1: Handle placement (place the staged piece first)
+    if (aiMove.placement && stagedPiece) {
+      console.log(`📍 STEP 1 - Placing piece at (${aiMove.placement.row}, ${aiMove.placement.col})`);
+      console.log(`🔍 PIECE DETAILS - Staged piece being placed: ${formatPieceForLogging(stagedPiece)} (height:${stagedPiece.height}, color:${stagedPiece.color}, shape:${stagedPiece.shape}, top:${stagedPiece.top})`);
+      console.log(`🔍 Current player placing: Player ${currentPlayer}`);
+      
+      const newBoard = [...board];
+      newBoard[aiMove.placement.row][aiMove.placement.col] = stagedPiece;
+      setBoard(newBoard);
+      setLastMove([aiMove.placement.row, aiMove.placement.col]);
+      setStagedPiece(null); // Clear the staged piece after placing
+      
+      console.log(`✅ STEP 1 COMPLETE - Piece placed, staged piece cleared`);
+    } else if (aiMove.placement && !stagedPiece) {
+      console.log(`❌ STEP 1 FAILED - Cannot place piece, no staged piece available`);
+    } else if (!aiMove.placement && stagedPiece) {
+      console.log(`🔄 STEP 1 SKIPPED - No placement specified (first move of game)`);
+    }
+
+    // STEP 2: Handle piece giving (give piece to opponent)
+    if (aiMove.pieceToGive) {
+      console.log(`🎁 STEP 2 - AI Player ${currentPlayer} giving piece to Player ${currentPlayer === 1 ? 2 : 1}`);
+      console.log(`🔍 PIECE DETAILS - Given piece: ${formatPieceForLogging(aiMove.pieceToGive)} (height:${aiMove.pieceToGive.height}, color:${aiMove.pieceToGive.color}, shape:${aiMove.pieceToGive.shape}, top:${aiMove.pieceToGive.top})`);
+      console.log(`🔍 This piece will be staged for Player ${currentPlayer === 1 ? 2 : 1} to place`);
+      
+      // Set the new staged piece (should be null from step 1, so no override warning)
+      setStagedPiece(aiMove.pieceToGive);
+      console.log(`✅ NEW STAGED PIECE SET: ${formatPieceForLogging(aiMove.pieceToGive)}`);
+      
+      // Remove the given piece from available pieces
+      const newAvailablePieces = availablePieces.filter(
+        p => !arePiecesEqual(p, aiMove.pieceToGive!)
+      );
+      setAvailablePieces(newAvailablePieces);
+      
+      // Switch to next player and set them to place phase
+      setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+      setGamePhase('place');
+      
+      console.log(`✅ STEP 2 COMPLETE - Piece given, switched to Player ${currentPlayer === 1 ? 2 : 1} in place phase`);
+    } else {
+      console.log(`❌ STEP 2 FAILED - No piece to give (this shouldn't happen for AI moves)`);
+    }
+    
+    console.log(`🎯 ======= AI COMPLETE MOVE FINISHED =======\n`);
+  };
+
+  const executeBasicAIMove = () => {
+    executionCountRef.current += 1;
+    console.log(`🤖 Basic AI (Player ${currentPlayer}) is thinking... [Execution #${executionCountRef.current}]`);
+    
+    const aiInput: AIInput = {
+      board,
+      pieceToPlace: stagedPiece,
+      availablePieces,
+      enableLogging: mctsConfig.enableLogging // Use the same logging flag as MCTS
+    };
+
+    const aiMove = makeAIMove(aiInput);
+    console.log(`🎯 Basic AI move completed [Execution #${executionCountRef.current}]`);
+    
+    // DEBUG: Log what the AI actually returned
+    const formatPieceForDisplay = (piece: PieceAttributes | null) => {
+      if (!piece) return 'null';
+      return formatPieceForLogging(piece);
+    };
+    
+    console.log(`🔍 AI RETURNED - Placement: ${aiMove.placement ? `(${aiMove.placement.row}, ${aiMove.placement.col})` : 'null'} - Piece to place: ${formatPieceForDisplay(stagedPiece)} ${stagedPiece ? `(height:${stagedPiece.height}, color:${stagedPiece.color}, shape:${stagedPiece.shape}, top:${stagedPiece.top})` : ''}`);
+    console.log(`🔍 AI RETURNED - PieceToGive: ${formatPieceForDisplay(aiMove.pieceToGive)} ${aiMove.pieceToGive ? `(height:${aiMove.pieceToGive.height}, color:${aiMove.pieceToGive.color}, shape:${aiMove.pieceToGive.shape}, top:${aiMove.pieceToGive.top})` : ''}`);
+    
+    // Convert AIMove format to common format
+    return {
+      placement: aiMove.placement,
+      pieceToGive: aiMove.pieceToGive
+    };
+  };
+
+  const executeMCTSMove = () => {
+    console.log(`🤖 MCTS AI (Player ${currentPlayer}) is thinking...`);
+    
+    const gameStateForMCTS = createGameStateFromApp(
+      board,
+      availablePieces,
+      stagedPiece,
+      currentPlayer,
+      gameState !== 'playing',
+      winner
+    );
+
+    const mcts = new MCTSSearch(mctsConfig);
+    const bestMove = mcts.search(gameStateForMCTS);
+
+    // Helper function to format piece for logging
+    const formatPiece = (piece: PieceAttributes) => 
+      `${piece.height[0]}${piece.color[0]}${piece.shape[0]}${piece.top[0]}`;
+
+    console.log(`🎯 MCTS AI selected move: ${bestMove.place ? `place at (${bestMove.place[1]},${bestMove.place[0]})` : 'no placement'}, ${bestMove.give ? `give piece ${formatPiece(bestMove.give)}` : 'no piece to give'}`);
+
+    // Convert MCTS move format to common AI move format
+    return {
+      placement: bestMove.place ? { row: bestMove.place[0], col: bestMove.place[1] } : undefined,
+      pieceToGive: bestMove.give
+    };
+  };
+
+  // Execute AI moves when it's an AI player's turn
+  useEffect(() => {
+    const isCurrentPlayerAI = (currentPlayer === 1 && player1AI) || (currentPlayer === 2 && player2AI);
+    
+    if (gameState === 'playing' && isCurrentPlayerAI) {
+      // Prevent multiple pending executions
+      if (pendingExecutionRef.current) {
+        console.log('🚫 AI execution already pending, skipping...');
+        return;
+      }
+      
+      pendingExecutionRef.current = true;
+      
+      const timer = setTimeout(() => {
+        executeAIMove();
+        pendingExecutionRef.current = false;
+      }, 500); // Small delay for better UX
+
+      return () => {
+        clearTimeout(timer);
+        pendingExecutionRef.current = false;
+      };
+    }
+  }, [currentPlayer, gamePhase, gameState, player1AI, player2AI, aiType]);
 
   const getGameStatusMessage = () => {
     if (gameState === 'won') {
@@ -269,6 +411,86 @@ function App() {
                 </div>
               )}
             </div>
+          </div>
+          
+          {/* AI Configuration Panel */}
+          <div className="ai-config-panel">
+            <h3>AI Configuration</h3>
+            
+            <div className="ai-type-selection">
+              <label>
+                <input
+                  type="radio"
+                  name="aiType"
+                  value="basic"
+                  checked={aiType === 'basic'}
+                  onChange={(e) => setAiType(e.target.value as 'basic' | 'mcts')}
+                />
+                Basic AI
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="aiType"
+                  value="mcts"
+                  checked={aiType === 'mcts'}
+                  onChange={(e) => setAiType(e.target.value as 'basic' | 'mcts')}
+                />
+                MCTS AI
+              </label>
+            </div>
+            
+            <div className="config-group">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={mctsConfig.enableLogging}
+                  onChange={(e) => setMctsConfig({
+                    ...mctsConfig,
+                    enableLogging: e.target.checked
+                  })}
+                />
+                Enable AI Logging (check console)
+              </label>
+            </div>
+            
+            {aiType === 'mcts' && (
+              <div className="mcts-config">
+                <div className="config-group">
+                  <label>
+                    Max Iterations: {mctsConfig.maxIterations}
+                    <input
+                      type="range"
+                      min="50"
+                      max="2000"
+                      step="50"
+                      value={mctsConfig.maxIterations}
+                      onChange={(e) => setMctsConfig({
+                        ...mctsConfig,
+                        maxIterations: parseInt(e.target.value)
+                      })}
+                    />
+                  </label>
+                </div>
+                
+                <div className="config-group">
+                  <label>
+                    Max Depth: {mctsConfig.maxDepth}
+                    <input
+                      type="range"
+                      min="1"
+                      max="8"
+                      step="1"
+                      value={mctsConfig.maxDepth}
+                      onChange={(e) => setMctsConfig({
+                        ...mctsConfig,
+                        maxDepth: parseInt(e.target.value)
+                      })}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

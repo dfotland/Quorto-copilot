@@ -33,6 +33,15 @@ export const arePiecesEqual = (piece1: PieceAttributes, piece2: PieceAttributes)
   return getPieceId(piece1) === getPieceId(piece2);
 };
 
+// Format a piece for logging (shows full attribute names)
+export const formatPieceForLogging = (piece: PieceAttributes): string => {
+  const height = piece.height === 'tall' ? 'Tall' : 'Short';
+  const top = piece.top === 'solid' ? 'Solid' : 'Hollow';
+  const color = piece.color === 'dark' ? 'Dark' : 'Light';
+  const shape = piece.shape === 'square' ? 'Square' : 'Round';
+  return `${height}/${top}/${color}/${shape}`;
+};
+
 // Check if four pieces share a common attribute
 const haveSameAttribute = (pieces: PieceAttributes[]): boolean => {
   if (pieces.length !== 4) return false;

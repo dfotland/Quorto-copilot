@@ -272,14 +272,16 @@ export interface MCTSConfig {
   maxDepth: number;
   explorationConstant: number;
   playoutDepth: number; // Max depth for random playouts
+  enableLogging: boolean; // Enable detailed iteration logging
 }
 
 // Default MCTS configuration
 export const defaultMCTSConfig: MCTSConfig = {
   maxIterations: 1000,
-  maxDepth: 20,
+  maxDepth: 4,
   explorationConstant: Math.sqrt(2),
-  playoutDepth: 50
+  playoutDepth: 17,
+  enableLogging: false
 };
 
 // MCTS Search Engine
@@ -294,28 +296,65 @@ export class MCTSSearch {
   search(initialState: GameState): Move {
     const root = new MCTSNode(initialState);
     
+    if (this.config.enableLogging) {
+      console.log('\n🔍 Starting MCTS Search');
+      console.log('📋 MCTS Configuration:');
+      console.log(`  Max Iterations: ${this.config.maxIterations}`);
+      console.log(`  Max Depth: ${this.config.maxDepth}`);
+      console.log(`  Exploration Constant: ${this.config.explorationConstant.toFixed(3)}`);
+      console.log(`  Playout Depth: ${this.config.playoutDepth}`);
+      console.log(`  Logging: ${this.config.enableLogging ? 'Enabled' : 'Disabled'}`);
+      console.log(`🎯 Initial State: Player ${initialState.currentPlayer}, ${initialState.availablePieces.length} pieces available`);
+    }
+    
     for (let iteration = 0; iteration < this.config.maxIterations; iteration++) {
+      if (this.config.enableLogging) {
+        console.log(`\n--- MCTS Iteration ${iteration + 1} ---`);
+      }
+      
       // Selection
       let node = this.select(root);
+      if (this.config.enableLogging) {
+        console.log(`Selected node at depth ${node.depth}`);
+      }
       
       // Expansion (if not terminal and within depth limit)
+      let expandedNode = node;
       if (!node.isTerminal() && node.visits > 0 && node.depth < this.config.maxDepth) {
         if (!node.isFullyExpanded()) {
-          node = node.expand();
+          expandedNode = node.expand();
+          
+          // Log the expanded node with indentation
+          if (this.config.enableLogging) {
+            const indent = '  '.repeat(expandedNode.depth);
+            const moveStr = expandedNode.move ? moveToString(expandedNode.move) : 'root';
+            console.log(`${indent}Expanded: ${moveStr} (${node.untriedMoves.length} untried moves remaining)`);
+          }
         }
       }
       
       // Simulation (playout)
-      const result = this.simulate(node.state);
+      const { result, playoutDepth, gameResult } = this.simulateWithLogging(expandedNode.state);
+      
+      // Log simulation results with indentation
+      if (this.config.enableLogging) {
+        const indent = '  '.repeat(expandedNode.depth);
+        console.log(`${indent}Playout depth: ${playoutDepth}, Result: ${gameResult} (${result})`);
+      }
       
       // Backpropagation
-      node.backpropagate(result);
+      expandedNode.backpropagate(result);
     }
 
     // Return best move based on visit count
     const bestChild = root.children.reduce((best, child) => 
       child.visits > best.visits ? child : best
     );
+    
+    if (this.config.enableLogging) {
+      console.log(`\n🏆 Best move selected: ${moveToString(bestChild.move!)} (${bestChild.visits} visits)`);
+      console.log(`📊 Search completed: ${this.config.maxIterations} iterations, ${root.visits} total visits`);
+    }
     
     return bestChild.move!;
   }
@@ -328,8 +367,8 @@ export class MCTSSearch {
     return node;
   }
 
-  // Simulation phase: random playout to end of game
-  private simulate(state: GameState): number {
+  // Simulation phase: random playout to end of game with logging
+  private simulateWithLogging(state: GameState): { result: number; playoutDepth: number; gameResult: string } {
     let currentState = this.cloneState(state);
     let depth = 0;
     
@@ -344,14 +383,22 @@ export class MCTSSearch {
       depth++;
     }
     
+    let gameResult: string;
+    let result: number;
+    
     // Return result from perspective of original player
     if (currentState.winner === state.currentPlayer) {
-      return 1.0; // Win
+      result = 1.0; // Win
+      gameResult = 'WIN';
     } else if (currentState.winner === null) {
-      return 0.5; // Tie
+      result = 0.5; // Tie
+      gameResult = 'DRAW';
     } else {
-      return 0.0; // Loss
+      result = 0.0; // Loss
+      gameResult = 'LOSS';
     }
+    
+    return { result, playoutDepth: depth, gameResult };
   }
 
   // Sort moves according to strategy
@@ -577,4 +624,34 @@ export function createGameStateFromApp(
     gameOver,
     winner
   };
+}
+
+// Helper function to convert a move to a string for logging
+export function moveToString(move: Move): string {
+  let result = '';
+  
+  // Add placement information
+  if (move.place) {
+    const [row, col] = move.place;
+    result += `place: ${col},${row}`;
+  } else {
+    result += 'place: none';
+  }
+  
+  // Add piece information
+  if (move.give) {
+    const piece = move.give;
+    const height = piece.height === 'tall' ? 'T' : 's';
+    const top = piece.top === 'solid' ? 'F' : 'h';
+    const color = piece.color === 'dark' ? 'D' : 'l';
+    const shape = piece.shape === 'square' ? 'S' : 'r';
+    result += ` give: ${height}${top}${color}${shape}`;
+  } else {
+    result += ' give: none';
+  }
+  
+  // Add value information
+  result += ` (value: ${move.value.toFixed(1)})`;
+  
+  return result;
 }
