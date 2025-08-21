@@ -1,16 +1,16 @@
 .piece-set {
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  padding: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin: 15px 0;
-  max-width: 400px;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin: 8px 0;
+  max-width: 320px;
 }
 
 .piece-set h3 {
   color: #333;
-  margin: 0 0 10px 0;
-  font-size: 1.2rem;
+  margin: 0 0 8px 0;
+  font-size: 1rem;
   text-align: center;
 }
 
@@ -18,22 +18,22 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 8px;
+  gap: 6px;
   justify-items: center;
-  padding: 8px;
-  width: 240px;
-  height: 240px;
+  padding: 6px;
+  width: 200px;
+  height: 200px;
 }
 
 .piece-slot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   background: #f8f9fa;
   border: 2px solid #e9ecef;
-  border-radius: 8px;
+  border-radius: 6px;
   transition: all 0.2s ease;
 }
 

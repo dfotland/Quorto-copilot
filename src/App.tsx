@@ -35,6 +35,7 @@ function App() {
   const [player1AI, setPlayer1AI] = useState<boolean>(false);
   const [player2AI, setPlayer2AI] = useState<boolean>(false);
   const [aiType, setAiType] = useState<'basic' | 'mcts'>('basic');
+  const [basicAIDifficulty, setBasicAIDifficulty] = useState<'easy' | 'normal' | 'hard' | 'nightmare'>('normal');
   
   // MCTS Configuration
   const [mctsConfig, setMctsConfig] = useState<MCTSConfig>(defaultMCTSConfig);
@@ -54,7 +55,7 @@ function App() {
   useEffect(() => {
     if (checkWinCondition(board)) {
       setGameState('won');
-      setWinner(gamePhase === 'place' ? (currentPlayer === 1 ? 2 : 1) : currentPlayer);
+      setWinner(currentPlayer); // The current player is the one who just placed the winning piece
       setWinningLine(getWinningLine(board));
     } else if (isBoardFull(board)) {
       setGameState('tie');
@@ -225,7 +226,8 @@ function App() {
       board,
       pieceToPlace: stagedPiece,
       availablePieces,
-      enableLogging: mctsConfig.enableLogging // Use the same logging flag as MCTS
+      enableLogging: mctsConfig.enableLogging, // Use the same logging flag as MCTS
+      difficulty: basicAIDifficulty
     };
 
     const aiMove = makeAIMove(aiInput);
@@ -320,7 +322,7 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Quarto Game</h1>
+      <h1 className="game-title">QuAIto Game</h1>
       
       <div className="game-container">
         <div className="game-section">
@@ -439,6 +441,58 @@ function App() {
                 MCTS AI
               </label>
             </div>
+            
+            {aiType === 'basic' && (
+              <div className="basic-ai-config">
+                <label>Basic AI Difficulty:</label>
+                <div className="difficulty-selection">
+                  <label className={basicAIDifficulty === 'easy' ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="basicAIDifficulty"
+                      value="easy"
+                      checked={basicAIDifficulty === 'easy'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                    />
+                    <span>Easy</span>
+                  </label>
+                  <label className={basicAIDifficulty === 'normal' ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="basicAIDifficulty"
+                      value="normal"
+                      checked={basicAIDifficulty === 'normal'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                    />
+                    <span>Normal</span>
+                  </label>
+                  <label className={basicAIDifficulty === 'hard' ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="basicAIDifficulty"
+                      value="hard"
+                      checked={basicAIDifficulty === 'hard'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                    />
+                    <span>Hard</span>
+                  </label>
+                  <label className={basicAIDifficulty === 'nightmare' ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="basicAIDifficulty"
+                      value="nightmare"
+                      checked={basicAIDifficulty === 'nightmare'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                    />
+                    <span>Nightmare</span>
+                  </label>
+                  {/* Debug info - remove this later */}
+                  <div style={{fontSize: '10px', color: '#666', marginTop: '4px'}}>
+                    Current: {basicAIDifficulty}
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="config-group">
               <label>

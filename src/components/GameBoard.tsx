@@ -53,7 +53,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ onCellClick, board, winningLine, 
 
   return (
     <div className="game-board">
-      <h2>Quarto Board</h2>
       <div className="board-grid">
         {Array.from({ length: 4 }, (_, rowIndex) => renderRow(rowIndex))}
       </div>

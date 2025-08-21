@@ -37,18 +37,18 @@
 
 /* Size variations */
 .piece-small {
-  width: 40px;
-  height: 40px;
+  width: 45px;
+  height: 45px;
 }
 
 .piece-medium {
-  width: 50px;
-  height: 50px;
+  width: 55px;
+  height: 55px;
 }
 
 .piece-large {
-  width: 60px;
-  height: 60px;
+  width: 65px;
+  height: 65px;
 }
 
 /* Piece body */
@@ -67,6 +67,19 @@
 /* Height variations */
 .piece-tall .piece-body {
   height: 100%;
+}
+
+.piece-tall .piece-body::before {
+  content: '';
+  position: absolute;
+  top: 60%; /* 60% down from the top */
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 2px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 1px;
+  z-index: 2; /* Above the piece body but below the top */
 }
 
 .piece-short .piece-body {

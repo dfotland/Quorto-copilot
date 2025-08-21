@@ -16,6 +16,7 @@ export interface AIInput {
   pieceToPlace: PieceAttributes | null; // null for first move
   availablePieces: PieceAttributes[];
   enableLogging?: boolean; // Optional logging flag
+  difficulty?: 'easy' | 'normal' | 'hard' | 'nightmare'; // AI difficulty level
 }
 
 /**
@@ -41,6 +42,19 @@ function getEmptyPositions(board: (PieceAttributes | null)[][]): BoardPosition[]
 function getRandomElement<T>(array: T[]): T {
   const randomIndex = Math.floor(Math.random() * array.length);
   return array[randomIndex];
+}
+
+/**
+ * Get random chance based on difficulty level
+ */
+function getRandomChance(difficulty: 'easy' | 'normal' | 'hard' | 'nightmare'): number {
+  switch (difficulty) {
+    case 'easy': return 0.6;     // 60% chance of random moves
+    case 'normal': return 0.3;   // 30% chance of random moves
+    case 'hard': return 0;     // 10% chance of random moves
+    case 'nightmare': return 0;  // 0% chance of random moves (always optimal)
+    default: return 0.3;
+  }
 }
 
 /**
@@ -79,13 +93,13 @@ function canPieceLeadToWin(piece: PieceAttributes, board: (PieceAttributes | nul
 
 /**
  * AI function to place a piece on the board
- * First tries to find a winning placement, otherwise places randomly
+ * Difficulty affects strategy: easy makes some random moves, nightmare is always optimal
  */
 export function makeAIPlacement(input: AIInput): BoardPosition | null {
-  const { board, pieceToPlace, enableLogging } = input;
+  const { board, pieceToPlace, enableLogging, difficulty = 'normal' } = input;
   
   if (enableLogging) {
-    console.log('🔵 Basic AI: Evaluating placement options...');
+    console.log(`🔵 Basic AI (${difficulty}): Evaluating placement options...`);
   }
   
   // If there's no piece to place, return null
@@ -95,7 +109,7 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
     }
     return null;
   }
-  
+
   const emptyPositions = getEmptyPositions(board);
   if (emptyPositions.length === 0) {
     if (enableLogging) {
@@ -103,122 +117,168 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
     }
     return null;
   }
-  
+
   if (enableLogging) {
     console.log(`🔵 Basic AI: Found ${emptyPositions.length} empty positions`);
     console.log('🔵 Basic AI: Checking for winning moves...');
   }
+
+  // Check for winning moves (easy difficulty skips this 10% of the time to be more beatable)
+  const shouldSkipWinCheck = difficulty === 'easy' && Math.random() < 0.1;
   
-  // First, check if there's a winning move
-  for (const position of emptyPositions) {
-    // Create a copy of the board with the piece placed
-    const testBoard = board.map(row => [...row]);
-    testBoard[position.row][position.col] = pieceToPlace;
-    
-    // Check if this placement results in a win
-    if (checkWinCondition(testBoard)) {
-      if (enableLogging) {
-        console.log(`🏆 Basic AI: Found winning move at (${position.col},${position.row})!`);
+  if (!shouldSkipWinCheck) {
+    // Always check for winning moves (all difficulties except when easy AI misses)
+    for (const position of emptyPositions) {
+      const testBoard = board.map(row => [...row]);
+      testBoard[position.row][position.col] = pieceToPlace;
+      
+      if (checkWinCondition(testBoard)) {
+        if (enableLogging) {
+          console.log(`🏆 Basic AI: Found winning move at (${position.col},${position.row})!`);
+        }
+        return position;
       }
-      return position; // Found a winning move!
+    }
+  } else {
+    if (enableLogging) {
+      console.log(`😴 Basic AI (easy): Skipping win check (10% chance) - being less optimal`);
     }
   }
-  
-  // No winning move found, choose position that maximizes safe pieces to give
+
+  // Difficulty-based strategy
+  const randomChance = getRandomChance(difficulty);
+  if (Math.random() < randomChance) {
+    // Make a random move (easier difficulties do this more often)
+    const randomPosition = getRandomElement(emptyPositions);
+    if (enableLogging) {
+      console.log(`🎲 Basic AI (${difficulty}): Making random placement at (${randomPosition.col},${randomPosition.row})`);
+    }
+    return randomPosition;
+  }
+
+  // Strategic placement (maximize safe pieces to give)
   if (enableLogging) {
     console.log('🧠 Basic AI: No winning move found, evaluating positions for maximum safe pieces...');
   }
-  
+
+  // Set minimum safe pieces threshold based on difficulty
+  const getMinSafePieces = (difficulty: 'easy' | 'normal' | 'hard' | 'nightmare'): number => {
+    switch (difficulty) {
+      case 'easy': return 2;
+      case 'normal': return 2;
+      case 'hard': return 3;
+      case 'nightmare': return 8;
+      default: return 2;
+    }
+  };
+
+  const minSafePieces = getMinSafePieces(difficulty);
   let bestPositions: BoardPosition[] = [];
   let maxSafePieces = -1;
-  
+  let positionsAboveThreshold: BoardPosition[] = [];
+
   for (const position of emptyPositions) {
-    // Create a test board with the piece placed at this position
     const testBoard = board.map(row => [...row]);
     testBoard[position.row][position.col] = pieceToPlace;
     
-    // Count how many pieces would be safe to give from this board state
     const safePiecesCount = input.availablePieces.filter(piece => {
-      return !canPieceLeadToWin(piece, testBoard, false); // Don't log during evaluation
+      return !canPieceLeadToWin(piece, testBoard, false);
     }).length;
-    
+
     if (enableLogging) {
-      console.log(`  📊 Position (${position.col},${position.row}): ${safePiecesCount} safe pieces`);
+      console.log(`  📊 Position (${position.col},${position.row}): ${safePiecesCount} safe pieces (min required: ${minSafePieces})`);
     }
-    
-    // Track positions with the highest number of safe pieces
+
+    // Track positions that meet the minimum threshold
+    if (safePiecesCount >= minSafePieces) {
+      positionsAboveThreshold.push(position);
+    }
+
+    // Also track the highest safe pieces count overall (for fallback)
     if (safePiecesCount > maxSafePieces) {
       maxSafePieces = safePiecesCount;
-      bestPositions = [position]; // Start new list with this position
+      bestPositions = [position];
     } else if (safePiecesCount === maxSafePieces) {
-      bestPositions.push(position); // Add to list of equally good positions
+      bestPositions.push(position);
     }
   }
-  
-  // Randomly select from the best positions
-  const selectedPosition = getRandomElement(bestPositions);
-  
-  if (enableLogging) {
-    if (bestPositions.length > 1) {
-      console.log(`🎯 Basic AI: Found ${bestPositions.length} positions with ${maxSafePieces} safe pieces, randomly selected (${selectedPosition.col},${selectedPosition.row})`);
-    } else {
-      console.log(`🎯 Basic AI: Selected position (${selectedPosition.col},${selectedPosition.row}) with ${maxSafePieces} safe pieces to give`);
+
+  let selectedPosition: BoardPosition;
+
+  // If we have positions that meet the minimum threshold, choose randomly among them
+  if (positionsAboveThreshold.length > 0) {
+    selectedPosition = getRandomElement(positionsAboveThreshold);
+    if (enableLogging) {
+      console.log(`🎯 Basic AI: Found ${positionsAboveThreshold.length} positions meeting minimum ${minSafePieces} safe pieces, randomly selected (${selectedPosition.col},${selectedPosition.row})`);
+    }
+  } else {
+    // No positions meet the minimum, choose from positions with highest safe pieces count
+    selectedPosition = getRandomElement(bestPositions);
+    if (enableLogging) {
+      console.log(`⚠️ Basic AI: No positions meet minimum ${minSafePieces} safe pieces, selected position with highest count ${maxSafePieces}: (${selectedPosition.col},${selectedPosition.row})`);
     }
   }
-  
+
   return selectedPosition;
 }
 
 /**
  * AI function to select a piece to give to the opponent
- * First tries to avoid giving pieces that would let opponent win
- * Falls back to random selection if all pieces lead to potential wins
- * Returns null if no pieces are available (game ending scenario)
+ * Difficulty affects piece selection strategy
  */
 export function makeAIPieceSelection(input: AIInput): PieceAttributes | null {
-  const { availablePieces, board, enableLogging } = input;
+  const { availablePieces, board, enableLogging, difficulty = 'normal' } = input;
   
   if (enableLogging) {
-    console.log('🟡 Basic AI: Selecting piece to give opponent...');
+    console.log(`🟡 Basic AI (${difficulty}): Selecting piece to give opponent...`);
     console.log(`🟡 Basic AI: ${availablePieces.length} pieces available:`);
     availablePieces.forEach((piece, index) => {
       console.log(`  ${index}: ${formatPieceForLogging(piece)} (height:${piece.height}, color:${piece.color}, shape:${piece.shape}, top:${piece.top})`);
     });
   }
-  
+
   if (availablePieces.length === 0) {
     if (enableLogging) {
       console.log('🟡 Basic AI: No pieces available to give (game ending)');
     }
-    return null; // No pieces left, game is ending
+    return null;
   }
-  
+
+  // Easy difficulty sometimes gives dangerous pieces intentionally
+  const randomChance = getRandomChance(difficulty);
+  if (Math.random() < randomChance) {
+    const randomPiece = getRandomElement(availablePieces);
+    if (enableLogging) {
+      console.log(`🎲 Basic AI (${difficulty}): Randomly selected ${formatPieceForLogging(randomPiece)}`);
+    }
+    return randomPiece;
+  }
+
   if (enableLogging) {
     console.log('🟡 Basic AI: Checking for dangerous pieces...');
   }
-  
-  // Find pieces that won't let the opponent win immediately
+
+  // Find safe pieces (strategic play)
   const safePieces = availablePieces.filter(piece => {
     const isDangerous = canPieceLeadToWin(piece, board, enableLogging);
     if (enableLogging && isDangerous) {
-      console.log(`⚠️ Basic AI: Piece ${formatPieceForLogging(piece)} (height:${piece.height}, color:${piece.color}, shape:${piece.shape}, top:${piece.top}) is dangerous (allows opponent win)`);
+      console.log(`⚠️ Basic AI: Piece ${formatPieceForLogging(piece)} is dangerous (allows opponent win)`);
     }
     return !isDangerous;
   });
-  
-  // If there are safe pieces, choose randomly from them
+
   if (safePieces.length > 0) {
     const selectedPiece = getRandomElement(safePieces);
     if (enableLogging) {
-      console.log(`✅ Basic AI: Selected safe piece ${formatPieceForLogging(selectedPiece)} (height:${selectedPiece.height}, color:${selectedPiece.color}, shape:${selectedPiece.shape}, top:${selectedPiece.top}) (${safePieces.length} safe pieces available)`);
+      console.log(`✅ Basic AI: Selected safe piece ${formatPieceForLogging(selectedPiece)} (${safePieces.length} safe pieces available)`);
     }
     return selectedPiece;
   }
-  
-  // If all pieces could lead to a win, pick randomly (opponent is likely to win anyway)
+
+  // All pieces are dangerous, pick randomly
   const selectedPiece = getRandomElement(availablePieces);
   if (enableLogging) {
-    console.log(`🚨 Basic AI: All pieces are dangerous! Selected ${formatPieceForLogging(selectedPiece)} (height:${selectedPiece.height}, color:${selectedPiece.color}, shape:${selectedPiece.shape}, top:${selectedPiece.top}) randomly`);
+    console.log(`🚨 Basic AI: All pieces are dangerous! Selected ${formatPieceForLogging(selectedPiece)} randomly`);
   }
   return selectedPiece;
 }
