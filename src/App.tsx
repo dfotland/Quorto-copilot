@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import GameBoard from './components/GameBoard';
 import PieceSet from './components/PieceSet';
 import Piece, { type PieceAttributes } from './components/Piece';
@@ -50,6 +50,9 @@ function App() {
   const executionCountRef = useRef(0);
   const lastExecutionKeyRef = useRef('');
   const pendingExecutionRef = useRef(false);
+
+  // AI Configuration popup state
+  const [showAIConfig, setShowAIConfig] = useState<boolean>(false);
 
   // Check for win condition after each move
   useEffect(() => {
@@ -133,7 +136,7 @@ function App() {
   };
 
   // Execute AI move based on current AI type
-  const executeAIMove = () => {
+  const executeAIMove = useCallback(() => {
     if (gameState !== 'playing') return;
 
     const isCurrentPlayerAI = (currentPlayer === 1 && player1AI) || (currentPlayer === 2 && player2AI);
@@ -160,7 +163,8 @@ function App() {
     if (aiMove) {
       applyAIMove(aiMove);
     }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState, currentPlayer, player1AI, player2AI, gamePhase, stagedPiece, availablePieces, aiType]);
 
   // Apply an AI move to the game state
   const applyAIMove = (aiMove: { placement?: { row: number; col: number } | null; pieceToGive?: PieceAttributes | null }) => {
@@ -300,7 +304,7 @@ function App() {
         pendingExecutionRef.current = false;
       };
     }
-  }, [currentPlayer, gamePhase, gameState, player1AI, player2AI, aiType]);
+  }, [currentPlayer, gamePhase, gameState, player1AI, player2AI, aiType, executeAIMove]);
 
   const getGameStatusMessage = () => {
     if (gameState === 'won') {
@@ -322,10 +326,15 @@ function App() {
 
   return (
     <div className="app">
-      <h1 className="game-title">QuAIto Game</h1>
-      
-      <div className="game-container">
-        <div className="game-section">
+      {/* 3x3 CSS Grid Layout */}
+      <div className="game-grid">
+        {/* Header - Top row, spans all 3 columns */}
+        <header className="header">
+          <h1 className="game-title">QuAIto Game</h1>
+        </header>
+
+        {/* Game Board - Left column, middle row */}
+        <div className="game-board-area">
           <GameBoard 
             onCellClick={handleCellClick} 
             board={board} 
@@ -333,64 +342,10 @@ function App() {
             gameOver={gameState !== 'playing'}
             lastMove={lastMove}
           />
-          
-          <div className="game-controls">
-            <div className="current-player">
-              <h3>{gameState === 'won' ? 'Game Over!' : gameState === 'tie' ? 'Game Over!' : `Current Player: ${currentPlayer}`}</h3>
-              <p className={gameState !== 'playing' ? 'game-over-status' : ''}>{getGameStatusMessage()}</p>
-            </div>
-            
-            <div className="ai-controls">
-              <div className="ai-player">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={player1AI}
-                    onChange={(e) => setPlayer1AI(e.target.checked)}
-                  />
-                  Player 1 AI
-                </label>
-              </div>
-              <div className="ai-player">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={player2AI}
-                    onChange={(e) => setPlayer2AI(e.target.checked)}
-                  />
-                  Player 2 AI
-                </label>
-              </div>
-            </div>
-
-            <div className="game-buttons">
-              <button 
-                onClick={startNewGame}
-                className="new-game-button"
-              >
-                {gameState === 'playing' ? 'New Game' : 'Play Again'}
-              </button>
-              <button 
-                onClick={runNeuralNetworkDemo}
-                className="demo-button"
-              >
-                🧠 Neural Net Demo
-              </button>
-            </div>
-            
-            <div className="game-info">
-              <p>Pieces placed: {16 - availablePieces.length}/16</p>
-              <p>Phase: {gamePhase === 'give' ? 'Select piece' : 'Place piece'}</p>
-            </div>
-          </div>
-          
-          {/* <div className="debug-info">
-            <h4>Debug Info</h4>
-            <pre>{JSON.stringify({ board, availablePieces, stagedPiece, selectedPiece, currentPlayer, gamePhase, gameState, winner, winningLine }, null, 2)}</pre>
-          </div> */}
         </div>
-        
-        <div className="piece-selection-area">
+
+        {/* Available Pieces - Right 2 columns, middle row */}
+        <div className="available-pieces-area">
           <PieceSet 
             availablePieces={availablePieces}
             selectedPiece={selectedPiece}
@@ -398,8 +353,10 @@ function App() {
             gamePhase={gamePhase}
             gameOver={gameState !== 'playing'}
           />
-          
-          {/* Staging Area */}
+        </div>
+
+        {/* Staged Piece - Middle column, bottom row */}
+        <div className="staged-piece-area">
           <div className="staging-area">
             <h3>Piece for {currentPlayer === 1 ? 'Player 1' : 'Player 2'}</h3>
             <div className={`staging-circle ${gameState !== 'playing' ? 'disabled' : ''}`}>
@@ -414,140 +371,218 @@ function App() {
               )}
             </div>
           </div>
-          
-          {/* AI Configuration Panel */}
-          <div className="ai-config-panel">
-            <h3>AI Configuration</h3>
-            
-            <div className="ai-type-selection">
-              <label>
-                <input
-                  type="radio"
-                  name="aiType"
-                  value="basic"
-                  checked={aiType === 'basic'}
-                  onChange={(e) => setAiType(e.target.value as 'basic' | 'mcts')}
-                />
-                Basic AI
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="aiType"
-                  value="mcts"
-                  checked={aiType === 'mcts'}
-                  onChange={(e) => setAiType(e.target.value as 'basic' | 'mcts')}
-                />
-                MCTS AI
-              </label>
-            </div>
-            
-            {aiType === 'basic' && (
-              <div className="basic-ai-config">
-                <label>Basic AI Difficulty:</label>
-                <div className="difficulty-selection">
-                  <label className={basicAIDifficulty === 'easy' ? 'selected' : ''}>
-                    <input
-                      type="radio"
-                      name="basicAIDifficulty"
-                      value="easy"
-                      checked={basicAIDifficulty === 'easy'}
-                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
-                    />
-                    <span>Easy</span>
-                  </label>
-                  <label className={basicAIDifficulty === 'normal' ? 'selected' : ''}>
-                    <input
-                      type="radio"
-                      name="basicAIDifficulty"
-                      value="normal"
-                      checked={basicAIDifficulty === 'normal'}
-                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
-                    />
-                    <span>Normal</span>
-                  </label>
-                  <label className={basicAIDifficulty === 'hard' ? 'selected' : ''}>
-                    <input
-                      type="radio"
-                      name="basicAIDifficulty"
-                      value="hard"
-                      checked={basicAIDifficulty === 'hard'}
-                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
-                    />
-                    <span>Hard</span>
-                  </label>
-                  <label className={basicAIDifficulty === 'nightmare' ? 'selected' : ''}>
-                    <input
-                      type="radio"
-                      name="basicAIDifficulty"
-                      value="nightmare"
-                      checked={basicAIDifficulty === 'nightmare'}
-                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
-                    />
-                    <span>Nightmare</span>
-                  </label>
-                  {/* Debug info - remove this later */}
-                  <div style={{fontSize: '10px', color: '#666', marginTop: '4px'}}>
-                    Current: {basicAIDifficulty}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <div className="config-group">
+        </div>
+
+        {/* Control Panel - Right column, bottom row */}
+        <div className="control-panel">
+          <div className="current-player-info">
+            <p className={`player-status ${gameState !== 'playing' ? 'game-over-status' : ''}`}>{getGameStatusMessage()}</p>
+          </div>
+
+          <div className="ai-controls">
+            <div className="ai-player">
               <label>
                 <input
                   type="checkbox"
-                  checked={mctsConfig.enableLogging}
-                  onChange={(e) => setMctsConfig({
-                    ...mctsConfig,
-                    enableLogging: e.target.checked
-                  })}
+                  checked={player1AI}
+                  onChange={(e) => setPlayer1AI(e.target.checked)}
                 />
-                Enable AI Logging (check console)
+                Player 1 AI
               </label>
             </div>
-            
-            {aiType === 'mcts' && (
-              <div className="mcts-config">
-                <div className="config-group">
-                  <label>
-                    Max Iterations: {mctsConfig.maxIterations}
-                    <input
-                      type="range"
-                      min="50"
-                      max="2000"
-                      step="50"
-                      value={mctsConfig.maxIterations}
-                      onChange={(e) => setMctsConfig({
-                        ...mctsConfig,
-                        maxIterations: parseInt(e.target.value)
-                      })}
-                    />
-                  </label>
-                </div>
-                
-                <div className="config-group">
-                  <label>
-                    Max Depth: {mctsConfig.maxDepth}
-                    <input
-                      type="range"
-                      min="1"
-                      max="8"
-                      step="1"
-                      value={mctsConfig.maxDepth}
-                      onChange={(e) => setMctsConfig({
-                        ...mctsConfig,
-                        maxDepth: parseInt(e.target.value)
-                      })}
-                    />
-                  </label>
-                </div>
-              </div>
-            )}
+            <div className="ai-player">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={player2AI}
+                  onChange={(e) => setPlayer2AI(e.target.checked)}
+                />
+                Player 2 AI
+              </label>
+            </div>
+          </div>
+
+          <div className="game-buttons">
+            <button 
+              onClick={startNewGame}
+              className="new-game-button"
+            >
+              {gameState === 'playing' ? 'New Game' : 'Play Again'}
+            </button>
+            <button 
+              onClick={() => setShowAIConfig(true)}
+              className="ai-config-button"
+            >
+              ⚙️ AI Settings
+            </button>
           </div>
         </div>
+
+        {/* Game Message Area - Fourth row, first column */}
+        <div className="game-message-area">
+          {gameState === 'won' && (
+            <div className="winner-announcement">
+              🎉 Player {winner} wins! 🎉
+            </div>
+          )}
+          {gameState === 'tie' && (
+            <div className="tie-announcement">
+              It's a tie! 🤝
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* AI Configuration Modal */}
+      {showAIConfig && (
+        <div className="modal-overlay" onClick={() => setShowAIConfig(false)}>
+          <div className="ai-config-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>AI Configuration</h3>
+              <button 
+                className="close-button" 
+                onClick={() => setShowAIConfig(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="modal-content">
+              <div className="ai-type-selection">
+                <label>
+                  <input
+                    type="radio"
+                    name="aiType"
+                    value="basic"
+                    checked={aiType === 'basic'}
+                    onChange={(e) => setAiType(e.target.value as 'basic' | 'mcts')}
+                  />
+                  Basic AI
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="aiType"
+                    value="mcts"
+                    checked={aiType === 'mcts'}
+                    onChange={(e) => setAiType(e.target.value as 'basic' | 'mcts')}
+                  />
+                  MCTS AI
+                </label>
+              </div>
+              
+              {aiType === 'basic' && (
+                <div className="basic-ai-config">
+                  <label>Basic AI Difficulty:</label>
+                  <div className="difficulty-selection">
+                    <label className={basicAIDifficulty === 'easy' ? 'selected' : ''}>
+                      <input
+                        type="radio"
+                        name="basicAIDifficulty"
+                        value="easy"
+                        checked={basicAIDifficulty === 'easy'}
+                        onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                      />
+                      <span>Easy</span>
+                    </label>
+                    <label className={basicAIDifficulty === 'normal' ? 'selected' : ''}>
+                      <input
+                        type="radio"
+                        name="basicAIDifficulty"
+                        value="normal"
+                        checked={basicAIDifficulty === 'normal'}
+                        onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                      />
+                      <span>Normal</span>
+                    </label>
+                    <label className={basicAIDifficulty === 'hard' ? 'selected' : ''}>
+                      <input
+                        type="radio"
+                        name="basicAIDifficulty"
+                        value="hard"
+                        checked={basicAIDifficulty === 'hard'}
+                        onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                      />
+                      <span>Hard</span>
+                    </label>
+                    <label className={basicAIDifficulty === 'nightmare' ? 'selected' : ''}>
+                      <input
+                        type="radio"
+                        name="basicAIDifficulty"
+                        value="nightmare"
+                        checked={basicAIDifficulty === 'nightmare'}
+                        onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                      />
+                      <span>Nightmare</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+              
+              <div className="config-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={mctsConfig.enableLogging}
+                    onChange={(e) => setMctsConfig({
+                      ...mctsConfig,
+                      enableLogging: e.target.checked
+                    })}
+                  />
+                  Enable AI Logging (check console)
+                </label>
+              </div>
+              
+              {aiType === 'mcts' && (
+                <div className="mcts-config">
+                  <div className="config-group">
+                    <label>
+                      Max Iterations: {mctsConfig.maxIterations}
+                      <input
+                        type="range"
+                        min="50"
+                        max="2000"
+                        step="50"
+                        value={mctsConfig.maxIterations}
+                        onChange={(e) => setMctsConfig({
+                          ...mctsConfig,
+                          maxIterations: parseInt(e.target.value)
+                        })}
+                      />
+                    </label>
+                  </div>
+                  
+                  <div className="config-group">
+                    <label>
+                      Max Depth: {mctsConfig.maxDepth}
+                      <input
+                        type="range"
+                        min="1"
+                        max="8"
+                        step="1"
+                        value={mctsConfig.maxDepth}
+                        onChange={(e) => setMctsConfig({
+                          ...mctsConfig,
+                          maxDepth: parseInt(e.target.value)
+                        })}
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              <div className="demo-section">
+                <button 
+                  onClick={runNeuralNetworkDemo}
+                  className="demo-button"
+                >
+                  🧠 Neural Net Demo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
