@@ -53,6 +53,10 @@ function App() {
 
   // AI Configuration popup state
   const [showAIConfig, setShowAIConfig] = useState<boolean>(false);
+  
+  // Rules and About popup states
+  const [showRules, setShowRules] = useState<boolean>(false);
+  const [showAbout, setShowAbout] = useState<boolean>(false);
 
   // Check for win condition after each move
   useEffect(() => {
@@ -331,6 +335,20 @@ function App() {
         {/* Header - Top row, spans all 3 columns */}
         <header className="header">
           <h1 className="game-title">QuAIto Game</h1>
+          <div className="header-buttons">
+            <button 
+              onClick={() => setShowRules(true)}
+              className="header-button"
+            >
+              Rules
+            </button>
+            <button 
+              onClick={() => setShowAbout(true)}
+              className="header-button"
+            >
+              About
+            </button>
+          </div>
         </header>
 
         {/* Game Board - Left column, middle row */}
@@ -358,7 +376,9 @@ function App() {
         {/* Staged Piece - Middle column, bottom row */}
         <div className="staged-piece-area">
           <div className="staging-area">
-            <h3>Piece for {currentPlayer === 1 ? 'Player 1' : 'Player 2'}</h3>
+            <div className="current-player-info">
+              <p className={`player-status ${gameState !== 'playing' ? 'game-over-status' : ''}`}>{getGameStatusMessage()}</p>
+            </div>
             <div className={`staging-circle ${gameState !== 'playing' ? 'disabled' : ''}`}>
               {stagedPiece ? (
                 <div className="staged-piece">
@@ -375,10 +395,6 @@ function App() {
 
         {/* Control Panel - Right column, bottom row */}
         <div className="control-panel">
-          <div className="current-player-info">
-            <p className={`player-status ${gameState !== 'playing' ? 'game-over-status' : ''}`}>{getGameStatusMessage()}</p>
-          </div>
-
           <div className="ai-controls">
             <div className="ai-player">
               <label>
@@ -578,6 +594,129 @@ function App() {
                 >
                   🧠 Neural Net Demo
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rules Modal */}
+      {showRules && (
+        <div className="modal-overlay" onClick={() => setShowRules(false)}>
+          <div className="rules-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Quarto Rules</h3>
+              <button 
+                className="close-button" 
+                onClick={() => setShowRules(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="modal-content">
+              <div className="rules-section">
+                <h4>Objective</h4>
+                <p>Be the first player to get four pieces in a row that share at least one common attribute.</p>
+              </div>
+              
+              <div className="rules-section">
+                <h4>Game Setup</h4>
+                <ul>
+                  <li>There are 16 unique pieces, each with 4 different attributes:</li>
+                  <li><strong>Height:</strong> Tall or Short</li>
+                  <li><strong>Color:</strong> Light or Dark</li>
+                  <li><strong>Shape:</strong> Circle or Square</li>
+                  <li><strong>Top:</strong> Solid or Hollow</li>
+                </ul>
+              </div>
+              
+              <div className="rules-section">
+                <h4>How to Play</h4>
+                <ol>
+                  <li><strong>Give Phase:</strong> The current player selects a piece from the available pieces for their opponent to place.</li>
+                  <li><strong>Place Phase:</strong> The opponent places the given piece on any empty square on the 4×4 board.</li>
+                  <li>Players alternate between giving and placing pieces.</li>
+                  <li>The game continues until someone wins or the board is full (tie).</li>
+                </ol>
+              </div>
+              
+              <div className="rules-section">
+                <h4>Winning</h4>
+                <p>A player wins by creating a line of four pieces that share at least one common attribute. Winning lines can be:</p>
+                <ul>
+                  <li>Horizontal (any row)</li>
+                  <li>Vertical (any column)</li>
+                  <li>Diagonal (either diagonal)</li>
+                </ul>
+              </div>
+              
+              <div className="rules-section">
+                <h4>Strategy Tip</h4>
+                <p>Try to avoid giving your opponent a piece that could complete a winning line, while setting up your own winning opportunities!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* About Modal */}
+      {showAbout && (
+        <div className="modal-overlay" onClick={() => setShowAbout(false)}>
+          <div className="about-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>About QuAIto</h3>
+              <button 
+                className="close-button" 
+                onClick={() => setShowAbout(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="modal-content">
+              <div className="about-section">
+                <h4>About the Game</h4>
+                <p>Quarto is a strategic board game invented by Blaise Müller in 1991. It's a game of logic and pattern recognition where players must think several moves ahead to avoid giving their opponent a winning opportunity.</p>
+              </div>
+              
+              <div className="about-section">
+                <h4>About This App</h4>
+                <p>QuAIto is a digital implementation of Quarto that features:</p>
+                <ul>
+                  <li><strong>Human vs Human:</strong> Play against a friend locally</li>
+                  <li><strong>AI Opponents:</strong> Challenge yourself against computer players</li>
+                  <li><strong>Multiple AI Types:</strong> Choose between Basic AI and advanced MCTS AI</li>
+                  <li><strong>Difficulty Levels:</strong> From Easy to Nightmare difficulty</li>
+                  <li><strong>Neural Network:</strong> Includes neural network demonstrations</li>
+                </ul>
+              </div>
+              
+              <div className="about-section">
+                <h4>AI Features</h4>
+                <p><strong>Basic AI:</strong> Uses heuristic-based decision making with configurable difficulty levels.</p>
+                <p><strong>MCTS AI:</strong> Implements Monte Carlo Tree Search for advanced strategic gameplay with customizable parameters.</p>
+              </div>
+              
+              <div className="about-section">
+                <h4>Technology</h4>
+                <p>Built with modern web technologies:</p>
+                <ul>
+                  <li>React 19 with TypeScript</li>
+                  <li>Vite for fast development</li>
+                  <li>CSS Grid for responsive layout</li>
+                  <li>Advanced AI algorithms</li>
+                </ul>
+              </div>
+              
+              <div className="about-section">
+                <h4>Tips for Playing</h4>
+                <ul>
+                  <li>Study the available pieces before making your selection</li>
+                  <li>Try the different AI difficulty levels to improve your skills</li>
+                  <li>Use the AI Settings to configure the computer opponents</li>
+                  <li>Watch for patterns and potential winning lines</li>
+                </ul>
               </div>
             </div>
           </div>

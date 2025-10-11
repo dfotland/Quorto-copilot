@@ -1,10 +1,11 @@
 .piece-set {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
-  padding: 15px;
+  padding: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin: 8px 0;
-  max-width: 400px;
+  max-width: 300px;
+  width: fit-content;
 }
 
 .piece-set h3 {
@@ -20,7 +21,7 @@
   grid-template-rows: repeat(4, 1fr);
   gap: 8px;
   justify-items: center;
-  padding: 8px;
+  padding: 4px;
   width: 280px;
   height: 280px;
 }
@@ -103,6 +104,7 @@
     width: 240px;
     height: 240px;
     gap: 6px;
+    padding: 2px;
   }
   
   .piece-slot {
@@ -111,7 +113,8 @@
   }
   
   .piece-set {
-    max-width: 280px;
-    padding: 12px;
+    max-width: 250px;
+    padding: 6px;
+    width: fit-content;
   }
 }

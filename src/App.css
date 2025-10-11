@@ -12,7 +12,7 @@
 /* 3x3 CSS Grid Layout */
 .game-grid {
   display: grid;
-  grid-template-columns: 3fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr;
   grid-template-rows: auto 1fr auto auto;
   gap: 20px;
   width: 100%;
@@ -29,10 +29,12 @@
 /* Header - Top row, spans all 3 columns */
 .header {
   grid-area: header;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
-  padding: 15px;
+  padding: 15px 25px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -43,6 +45,33 @@
   font-family: 'Times New Roman', 'Georgia', serif;
   font-weight: bold;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  text-align: center;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.header-button {
+  padding: 8px 16px;
+  background: linear-gradient(45deg, #6c757d, #495057);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+}
+
+.header-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+  background: linear-gradient(45deg, #5a6268, #3d4146);
 }
 
 /* Game Board Area - Left column, middle row */
@@ -54,7 +83,7 @@
   justify-content: center;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
-  padding: 20px;
+  padding: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -105,6 +134,9 @@
 /* Available Pieces Area - Right 2 columns, row 2 */
 .available-pieces-area {
   grid-area: pieces;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.9);
   border-radius: 12px;
   padding: 20px;
@@ -288,6 +320,17 @@
   overflow-y: auto;
 }
 
+.rules-modal,
+.about-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -452,6 +495,55 @@
   box-shadow: 0 4px 8px rgba(111, 66, 193, 0.3);
 }
 
+/* Rules and About Modal Content Styles */
+.rules-section,
+.about-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.rules-section:last-child,
+.about-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.rules-section h4,
+.about-section h4 {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.rules-section p,
+.about-section p {
+  margin: 8px 0;
+  color: #555;
+  line-height: 1.5;
+}
+
+.rules-section ul,
+.rules-section ol,
+.about-section ul {
+  margin: 8px 0;
+  padding-left: 20px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.rules-section li,
+.about-section li {
+  margin-bottom: 5px;
+}
+
+.rules-section strong,
+.about-section strong {
+  color: #333;
+  font-weight: 600;
+}
+
 /* Responsive Design */
 @media (max-width: 1000px) {
   .game-grid {
@@ -468,6 +560,12 @@
 
   .header h1 {
     font-size: 2rem;
+  }
+  
+  .header-button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    min-width: 60px;
   }
 }
 
@@ -486,6 +584,20 @@
 
   .header h1 {
     font-size: 1.5rem;
+  }
+  
+  .header {
+    padding: 10px 15px;
+  }
+  
+  .header-button {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    min-width: 50px;
+  }
+  
+  .header-buttons {
+    gap: 8px;
   }
 
   .ai-type-selection {
