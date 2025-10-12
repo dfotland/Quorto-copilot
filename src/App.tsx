@@ -649,7 +649,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowAbout(false)}>
           <div className="about-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>About QuAIto</h3>
+              <h3>About QuAIto 0.9</h3>
               <button 
                 className="close-button" 
                 onClick={() => setShowAbout(false)}
@@ -670,16 +670,8 @@ function App() {
                 <ul>
                   <li><strong>Human vs Human:</strong> Play against a friend locally</li>
                   <li><strong>AI Opponents:</strong> Challenge yourself against computer players</li>
-                  <li><strong>Multiple AI Types:</strong> Choose between Basic AI and advanced MCTS AI</li>
-                  <li><strong>Difficulty Levels:</strong> From Easy to Nightmare difficulty</li>
-                  <li><strong>Neural Network:</strong> Includes neural network demonstrations</li>
+                  <li><strong>Basic AI:</strong> Uses heuristic-based decision making with configurable difficulty levels that adjust strategic thinking and randomness</li>
                 </ul>
-              </div>
-              
-              <div className="about-section">
-                <h4>AI Features</h4>
-                <p><strong>Basic AI:</strong> Uses heuristic-based decision making with configurable difficulty levels.</p>
-                <p><strong>MCTS AI:</strong> Implements Monte Carlo Tree Search for advanced strategic gameplay with customizable parameters.</p>
               </div>
               
               <div className="about-section">
@@ -689,7 +681,7 @@ function App() {
                   <li>React 19 with TypeScript</li>
                   <li>Vite for fast development</li>
                   <li>CSS Grid for responsive layout</li>
-                  <li>Advanced AI algorithms</li>
+                  <li>Strategic AI algorithms</li>
                 </ul>
               </div>
               
@@ -698,9 +690,14 @@ function App() {
                 <ul>
                   <li>Study the available pieces before making your selection</li>
                   <li>Try the different AI difficulty levels to improve your skills</li>
-                  <li>Use the AI Settings to configure the computer opponents</li>
                   <li>Watch for patterns and potential winning lines</li>
+                  <li>Think ahead - consider what pieces you'll have to give your opponent</li>
                 </ul>
+              </div>
+              
+              <div className="about-section">
+                <h4>Contact</h4>
+                <p>For suggestions or bugs, email: <strong>fotland@smart-games.com</strong></p>
               </div>
             </div>
           </div>
