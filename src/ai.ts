@@ -123,11 +123,18 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
     console.log('🔵 Basic AI: Checking for winning moves...');
   }
 
-  // Check for winning moves (easy difficulty skips this 10% of the time to be more beatable)
-  const shouldSkipWinCheck = difficulty === 'easy' && Math.random() < 0.1;
+  // Map difficulty levels to win check skip probabilities
+  const winCheckSkipMap: Record<'easy' | 'normal' | 'hard' | 'nightmare', number> = {
+    easy: 0.2,
+    normal: 0.05,
+    hard: 0.01,
+    nightmare: 0
+  };
+  
+  const shouldSkipWinCheck = Math.random() < winCheckSkipMap[difficulty];
   
   if (!shouldSkipWinCheck) {
-    // Always check for winning moves (all difficulties except when easy AI misses)
+    // Check for winning moves (may be skipped based on difficulty level)
     for (const position of emptyPositions) {
       const testBoard = board.map(row => [...row]);
       testBoard[position.row][position.col] = pieceToPlace;
@@ -141,7 +148,7 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
     }
   } else {
     if (enableLogging) {
-      console.log(`😴 Basic AI (easy): Skipping win check (10% chance) - being less optimal`);
+      console.log(`😴 Basic AI (${difficulty}): Skipping win check (${(winCheckSkipMap[difficulty] * 100).toFixed(1)}% chance) - being less optimal`);
     }
   }
 
@@ -244,7 +251,7 @@ export function makeAIPieceSelection(input: AIInput): PieceAttributes | null {
     return null;
   }
 
-  // Easy difficulty sometimes gives dangerous pieces intentionally
+  // All difficulty levels sometimes make random moves based on their randomness factor
   const randomChance = getRandomChance(difficulty);
   if (Math.random() < randomChance) {
     const randomPiece = getRandomElement(availablePieces);

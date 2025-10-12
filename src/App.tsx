@@ -6,7 +6,6 @@ import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getW
 import { MCTSSearch, createGameStateFromApp, type MCTSConfig, defaultMCTSConfig } from './ai/mcts';
 import { makeAIMove, type AIInput } from './ai';
 import './App.css';
-import { NeuralNetworkDemo } from './neural/NeuralNetworkDemo';
 
 type GamePhase = 'place' | 'give';
 type Player = 1 | 2;
@@ -35,7 +34,7 @@ function App() {
   const [player1AI, setPlayer1AI] = useState<boolean>(false);
   const [player2AI, setPlayer2AI] = useState<boolean>(false);
   const [aiType, setAiType] = useState<'basic' | 'mcts'>('basic');
-  const [basicAIDifficulty, setBasicAIDifficulty] = useState<'easy' | 'normal' | 'hard' | 'nightmare'>('normal');
+  const [basicAIDifficulty, setBasicAIDifficulty] = useState<'easy' | 'normal' | 'hard' | 'nightmare'>('easy');
   
   // MCTS Configuration
   const [mctsConfig, setMctsConfig] = useState<MCTSConfig>(defaultMCTSConfig);
@@ -318,14 +317,8 @@ function App() {
     } else if (gamePhase === 'give') {
       return `Player ${currentPlayer}: Select a piece for Player ${currentPlayer === 1 ? 2 : 1} to place`;
     } else {
-      return `Player ${currentPlayer}: Place the selected piece on the board`;
+      return `Player ${currentPlayer}: Place this piece on the board`;
     }
-  };
-
-  const runNeuralNetworkDemo = () => {
-    console.clear();
-    NeuralNetworkDemo.runDemo();
-    NeuralNetworkDemo.benchmarkPerformance();
   };
 
   return (
@@ -586,15 +579,6 @@ function App() {
                   </div>
                 </div>
               )}
-
-              <div className="demo-section">
-                <button 
-                  onClick={runNeuralNetworkDemo}
-                  className="demo-button"
-                >
-                  🧠 Neural Net Demo
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -605,7 +589,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowRules(false)}>
           <div className="rules-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Quarto Rules</h3>
+              <h3>QuAIto (Quarto with AI)</h3>
               <button 
                 className="close-button" 
                 onClick={() => setShowRules(false)}

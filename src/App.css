@@ -12,13 +12,13 @@
 /* 3x3 CSS Grid Layout */
 .game-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 3fr 1fr 1fr;
   grid-template-rows: auto 1fr auto auto;
   gap: 20px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 900px;
   height: 100vh;
-  max-height: 800px;
+  max-height: 750px;
   grid-template-areas:
     "header header header"
     "board pieces pieces"
@@ -551,8 +551,8 @@
     grid-template-rows: auto auto 1fr auto;
     grid-template-areas:
       "header header"
-      "pieces pieces"
       "board board"
+      "pieces pieces"
       "staged controls";
     max-height: none;
     height: auto;
@@ -575,8 +575,8 @@
     grid-template-rows: auto auto auto auto auto;
     grid-template-areas:
       "header"
-      "pieces"
       "board"
+      "pieces"
       "staged"
       "controls";
     gap: 15px;
