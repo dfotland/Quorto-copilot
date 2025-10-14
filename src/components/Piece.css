@@ -8,6 +8,8 @@
   position: relative;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
   animation: pieceEntry 0.4s ease-out;
+  width: 7vmin;
+  height: 7vmin;
 }
 
 @keyframes pieceEntry {
@@ -35,22 +37,6 @@
   filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
 }
 
-/* Size variations */
-.piece-small {
-  width: 45px;
-  height: 45px;
-}
-
-.piece-medium {
-  width: 55px;
-  height: 55px;
-}
-
-.piece-large {
-  width: 65px;
-  height: 65px;
-}
-
 /* Piece body */
 .piece-body {
   display: flex;
@@ -65,14 +51,20 @@
 }
 
 /* Height variations */
-.piece-tall .piece-body {
-  height: 100%;
+.piece-short .piece-body {
+  height: 50% !important;
 }
 
-.piece-tall .piece-body::before {
+/* Reduce piece height on board for consistent alignment */
+.board-cell .piece {
+  height: 80%;
+  margin-bottom: 10%;
+}
+
+.piece-split .piece-body::before {
   content: '';
   position: absolute;
-  top: 60%; /* 60% down from the top */
+  top: 50%; /* 50% down from the top - halfway up the piece */
   left: 0;
   right: 0;
   width: 100%;
@@ -83,7 +75,7 @@
 }
 
 .piece-short .piece-body {
-  height: 70%;
+  height: 80%;
 }
 
 /* Shape variations - Square pieces */
@@ -98,16 +90,6 @@
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.piece-square .piece-top {
-  width: 100%;
-  height: 30%;
-  border-radius: 4px;
-  background: linear-gradient(135deg, currentColor 0%, color-mix(in srgb, currentColor 90%, white 10%) 100%);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
 /* Shape variations - Round pieces */
 .piece-round .piece-body {
   width: 80%;
@@ -118,16 +100,6 @@
     inset 0 -2px 4px rgba(0, 0, 0, 0.2),
     0 2px 4px rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.piece-round .piece-top {
-  width: 60%;
-  height: 30%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 30% 30%, currentColor 0%, color-mix(in srgb, currentColor 90%, white 10%) 100%);
-  box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.4),
-    0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Color variations */
@@ -158,77 +130,14 @@
 }
 
 /* Top variations */
-.piece-solid .piece-top {
-  background: linear-gradient(135deg, #8B4513 0%, #A0522D 85%, #654321 100%) !important;
+.piece-smooth .piece-top {
+  background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
   border: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 
-    inset 0 1px 0 rgba(255, 255, 255, 0.4),
-    0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Remove the special case for light pieces with solid tops since all solid tops should be dark */
+/* Remove the special case for light pieces with smooth tops since all smooth tops should be dark */
 
-.piece-hollow .piece-top {
-  background: linear-gradient(135deg, #F5DEB3 0%, #E6D3A3 100%);
-  border: 3px solid currentColor;
-  box-sizing: border-box;
-  box-shadow: 
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-    0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-/* Remove border from dark hollow piece tops */
-.piece-dark.piece-hollow .piece-top {
-  border: none !important;
-}
-
-/* Ensure light hollow tops keep consistent border width */
-.piece-light.piece-hollow .piece-top {
-  border-width: 3px !important;
-}
-
-/* Special styling for hollow pieces */
-.piece-hollow.piece-square .piece-body {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.05) 100%);
-  box-sizing: border-box;
-  box-shadow: 
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-    0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.piece-hollow.piece-round .piece-body {
-  background: radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0.05) 100%);
-  box-sizing: border-box;
-  box-shadow: 
-    inset 0 0 0 1px rgba(255, 255, 255, 0.2),
-    0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* Ensure dark hollow pieces also have consistent lighter body color */
-.piece-dark.piece-hollow.piece-square .piece-body {
-  background: linear-gradient(135deg, #C4915C 0%, #B8860B 50%, #A0742D 100%) !important;
-}
-
-.piece-dark.piece-hollow.piece-round .piece-body {
-  background: radial-gradient(ellipse at 30% 30%, #C4915C 0%, #B8860B 40%, #A0742D 100%) !important;
-}
-
-/* Ensure light hollow pieces also have consistent body color */
-.piece-light.piece-hollow.piece-square .piece-body {
-  background: linear-gradient(135deg, #FAE5B8 0%, #E6D3A3 50%, #D4C194 100%) !important;
-}
-
-.piece-light.piece-hollow.piece-round .piece-body {
-  background: radial-gradient(ellipse at 30% 30%, #FAE5B8 0%, #E6D3A3 40%, #D4C194 100%) !important;
-}
-
-/* Ensure proper positioning */
-.piece-top {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
+/* Height variations for better visual distinction */
 
 /* Enhanced 3D shadow effect */
 .piece-body::after {

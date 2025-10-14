@@ -4,34 +4,39 @@
   padding: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin: 8px 0;
-  max-width: 300px;
-  width: fit-content;
-}
-
-.piece-set h3 {
-  color: #333;
-  margin: 0 0 8px 0;
-  font-size: 1rem;
-  text-align: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  container-type: size;
 }
 
 .pieces-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 8px;
+  gap: 4px;
   justify-items: center;
   padding: 4px;
-  width: 280px;
-  height: 280px;
+  min-width: 0;
+  min-height: 0;
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+  aspect-ratio: 1;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .piece-slot {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 55px;
-  height: 55px;
+  width: 100%;
+  height: 100%;
   background: #f8f9fa;
   border: 2px solid #e9ecef;
   border-radius: 6px;
@@ -61,6 +66,12 @@
 
 .selected-piece-info p:first-child {
   font-weight: bold;
+}
+
+/* Apply same piece styling as board pieces */
+.piece-slot .piece {
+  height: 80%;
+  margin-bottom: 10%;
 }
 
 .pieces-grid.disabled {

@@ -315,7 +315,7 @@ function App() {
     } else if (gameState === 'tie') {
       return `🤝 It's a Tie! 🤝`;
     } else if (gamePhase === 'give') {
-      return `Player ${currentPlayer}: Select a piece for Player ${currentPlayer === 1 ? 2 : 1} to place`;
+      return `Player ${currentPlayer}: Select an available piece for Player ${currentPlayer === 1 ? 2 : 1} to place`;
     } else {
       return `Player ${currentPlayer}: Place this piece on the board`;
     }
@@ -357,6 +357,7 @@ function App() {
 
         {/* Available Pieces - Right 2 columns, middle row */}
         <div className="available-pieces-area">
+          <h3>Available Pieces ({availablePieces.length}/16)</h3>
           <PieceSet 
             availablePieces={availablePieces}
             selectedPiece={selectedPiece}
@@ -366,25 +367,7 @@ function App() {
           />
         </div>
 
-        {/* Staged Piece - Middle column, bottom row */}
-        <div className="staged-piece-area">
-          <div className="staging-area">
-            <div className="current-player-info">
-              <p className={`player-status ${gameState !== 'playing' ? 'game-over-status' : ''}`}>{getGameStatusMessage()}</p>
-            </div>
-            <div className={`staging-circle ${gameState !== 'playing' ? 'disabled' : ''}`}>
-              {stagedPiece ? (
-                <div className="staged-piece">
-                  <Piece attributes={stagedPiece} size="small" />
-                </div>
-              ) : (
-                <div className="staging-empty">
-                  <span>{gameState === 'playing' ? 'Select a piece above' : 'Game Over'}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+
 
         {/* Control Panel - Right column, bottom row */}
         <div className="control-panel">
@@ -410,7 +393,7 @@ function App() {
               </label>
             </div>
           </div>
-
+          
           <div className="game-buttons">
             <button 
               onClick={startNewGame}
@@ -429,6 +412,21 @@ function App() {
 
         {/* Game Message Area - Fourth row, first column */}
         <div className="game-message-area">
+          <div className="current-player-info">
+            <p className={`player-status ${gameState !== 'playing' ? 'game-over-status' : ''}`}>{getGameStatusMessage()}</p>
+          </div>
+          {gameState === 'playing' && (
+            <div className="staging-circle">
+              {stagedPiece ? (
+                <div className="staged-piece">
+                  <Piece attributes={stagedPiece} />
+                </div>
+              ) : (
+                <div className="staging-empty">
+                </div>
+              )}
+            </div>
+          )}
           {gameState === 'won' && (
             <div className="winner-announcement">
               🎉 Player {winner} wins! 🎉
@@ -611,7 +609,7 @@ function App() {
                   <li><strong>Height:</strong> Tall or Short</li>
                   <li><strong>Color:</strong> Light or Dark</li>
                   <li><strong>Shape:</strong> Circle or Square</li>
-                  <li><strong>Top:</strong> Solid or Hollow</li>
+                  <li><strong>Top:</strong> Smooth or Split</li>
                 </ul>
               </div>
               

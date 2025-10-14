@@ -38,9 +38,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ onCellClick, board, winningLine, 
         className={`board-cell ${isWinning ? 'winning-cell' : ''} ${isLastMove ? 'last-move-cell' : ''} ${gameOver ? 'game-over' : ''}`}
         onClick={() => handleCellClick(row, col)}
       >
-        <div className="cell-circle">
-          {piece && <Piece attributes={piece} size="small" />}
-        </div>
+        {piece && <Piece attributes={piece} />}
       </div>
     );
   };

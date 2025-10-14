@@ -5,12 +5,11 @@ export interface PieceAttributes {
   height: 'tall' | 'short';
   color: 'light' | 'dark';
   shape: 'square' | 'round';
-  top: 'solid' | 'hollow';
+  top: 'smooth' | 'split';
 }
 
 interface PieceProps {
   attributes: PieceAttributes;
-  size?: 'small' | 'medium' | 'large';
   onClick?: () => void;
   isSelected?: boolean;
   className?: string;
@@ -18,14 +17,12 @@ interface PieceProps {
 
 const Piece: React.FC<PieceProps> = ({ 
   attributes, 
-  size = 'medium', 
   onClick, 
   isSelected = false,
   className = ''
 }) => {
   const pieceClasses = [
     'piece',
-    `piece-${size}`,
     `piece-${attributes.height}`,
     `piece-${attributes.color}`,
     `piece-${attributes.shape}`,
@@ -43,7 +40,6 @@ const Piece: React.FC<PieceProps> = ({
       tabIndex={onClick ? 0 : undefined}
     >
       <div className="piece-body">
-        <div className="piece-top"></div>
       </div>
     </div>
   );

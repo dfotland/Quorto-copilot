@@ -38,7 +38,6 @@ const PieceSet: React.FC<PieceSetProps> = ({
 
   return (
     <div className="piece-set">
-      <h3>Available Pieces ({availablePieces.length}/16)</h3>
       <div className={`pieces-grid ${!canSelectPieces ? 'disabled' : ''}`}>
         {allPieces.map((piece, index) => {
           const pieceId = getPieceId(piece);
@@ -49,7 +48,6 @@ const PieceSet: React.FC<PieceSetProps> = ({
               {isAvailable ? (
                 <Piece
                   attributes={piece}
-                  size="small"
                   onClick={canSelectPieces ? () => onPieceSelect(piece) : undefined}
                   isSelected={isPieceSelected(piece)}
                 />

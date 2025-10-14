@@ -7,7 +7,7 @@ export const generateAllPieces = (): PieceAttributes[] => {
   const heights: ('tall' | 'short')[] = ['tall', 'short'];
   const colors: ('light' | 'dark')[] = ['light', 'dark'];
   const shapes: ('square' | 'round')[] = ['square', 'round'];
-  const tops: ('solid' | 'hollow')[] = ['solid', 'hollow'];
+  const tops: ('smooth' | 'split')[] = ['smooth', 'split'];
   
   // Generate all possible combinations (2^4 = 16 pieces)
   for (const height of heights) {
@@ -36,7 +36,7 @@ export const arePiecesEqual = (piece1: PieceAttributes, piece2: PieceAttributes)
 // Format a piece for logging (shows full attribute names)
 export const formatPieceForLogging = (piece: PieceAttributes): string => {
   const height = piece.height === 'tall' ? 'Tall' : 'Short';
-  const top = piece.top === 'solid' ? 'Solid' : 'Hollow';
+  const top = piece.top === 'smooth' ? 'Smooth' : 'Split';
   const color = piece.color === 'dark' ? 'Dark' : 'Light';
   const shape = piece.shape === 'square' ? 'Square' : 'Round';
   return `${height}/${top}/${color}/${shape}`;
