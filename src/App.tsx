@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import GameBoard from './components/GameBoard';
 import PieceSet from './components/PieceSet';
 import Piece, { type PieceAttributes } from './components/Piece';
+import ControlPanel from './components/ControlPanel';
 import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine, formatPieceForLogging } from './utils/gameUtils';
 import { MCTSSearch, createGameStateFromApp, type MCTSConfig, defaultMCTSConfig } from './ai/mcts';
 import { makeAIMove, type AIInput } from './ai';
@@ -370,45 +371,14 @@ function App() {
 
 
         {/* Control Panel - Right column, bottom row */}
-        <div className="control-panel">
-          <div className="ai-controls">
-            <div className="ai-player">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={player1AI}
-                  onChange={(e) => setPlayer1AI(e.target.checked)}
-                />
-                Player 1 AI
-              </label>
-            </div>
-            <div className="ai-player">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={player2AI}
-                  onChange={(e) => setPlayer2AI(e.target.checked)}
-                />
-                Player 2 AI
-              </label>
-            </div>
-          </div>
-          
-          <div className="game-buttons">
-            <button 
-              onClick={startNewGame}
-              className="new-game-button"
-            >
-              {gameState === 'playing' ? 'New Game' : 'Play Again'}
-            </button>
-            <button 
-              onClick={() => setShowAIConfig(true)}
-              className="ai-config-button"
-            >
-              ⚙️ AI Settings
-            </button>
-          </div>
-        </div>
+        <ControlPanel
+          player1AI={player1AI}
+          player2AI={player2AI}
+          onNewGame={startNewGame}
+          onTogglePlayer1AI={(checked) => setPlayer1AI(checked)}
+          onTogglePlayer2AI={(checked) => setPlayer2AI(checked)}
+          onOpenAIConfig={() => setShowAIConfig(true)}
+        />
 
         {/* Game Message Area - Fourth row, first column */}
         <div className="game-message-area">

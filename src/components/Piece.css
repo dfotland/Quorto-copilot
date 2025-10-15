@@ -148,10 +148,6 @@
   border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
-/* Remove the special case for light pieces with smooth tops since all smooth tops should be dark */
-
-/* Height variations for better visual distinction */
-
 /* Enhanced 3D shadow effect */
 .piece-body::after {
   content: '';

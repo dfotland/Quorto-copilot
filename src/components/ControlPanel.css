@@ -1,0 +1,115 @@
+/* Control Panel Component */
+.control-panel {
+  grid-area: controls;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--board-border-radius);
+  padding: var(--spacing-xl) var(--spacing-xxl);
+  box-shadow: 0 var(--shadow-small) var(--board-border-radius) rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-xxl);
+  min-height: var(--min-height-standard);
+}
+
+.game-buttons {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.new-game-button {
+  padding: var(--spacing-medium) var(--spacing-xl);
+  border: none;
+  border-radius: var(--spacing-medium);
+  font-size: var(--font-medium);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  background: linear-gradient(45deg, #28a745, #20c997);
+  color: white;
+}
+
+.new-game-button:hover {
+  transform: translateY(var(--transform-hover));
+  box-shadow: 0 var(--shadow-small) var(--shadow-medium) rgba(40, 167, 69, 0.3);
+}
+
+.ai-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-medium);
+  align-items: center;
+}
+
+.ai-players {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-large);
+  justify-content: center;
+}
+
+.ai-player {
+  display: flex;
+  align-items: center;
+}
+
+.ai-player label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-medium);
+  font-size: var(--font-medium);
+  color: #333;
+  cursor: pointer;
+}
+
+.ai-player input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
+.ai-config-button {
+  padding: var(--spacing-medium) var(--spacing-xl);
+  border: none;
+  border-radius: var(--spacing-medium);
+  font-size: var(--font-medium);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  color: white;
+}
+
+.ai-config-button:hover {
+  transform: translateY(var(--transform-hover));
+  box-shadow: 0 var(--shadow-small) var(--shadow-medium) rgba(0, 123, 255, 0.3);
+}
+
+/* Mobile Responsive Design */
+@media (max-width: 600px) {
+  .control-panel {
+    flex-direction: column;
+    gap: var(--spacing-large);
+    min-height: auto;
+    padding: var(--spacing-large) var(--spacing-xxl);
+    align-items: stretch;
+  }
+  
+  .game-buttons {
+    justify-content: center;
+  }
+  
+  .ai-controls {
+    align-items: center;
+  }
+  
+  .ai-players {
+    flex-direction: row;
+    gap: var(--spacing-large);
+  }
+  
+  .ai-player label {
+    font-size: var(--font-small);
+  }
+}

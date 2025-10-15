@@ -1,9 +1,9 @@
 .piece-set {
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  padding: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin: 8px 0;
+  border-radius: var(--board-border-radius);
+  padding: calc(var(--piece-base-size) * 0.15);
+  box-shadow: 0 calc(var(--piece-base-size) * 0.03) calc(var(--piece-base-size) * 0.12) rgba(0, 0, 0, 0.1);
+  margin: calc(var(--piece-base-size) * 0.12) 0;
   width: 100%;
   height: 100%;
   display: flex;
@@ -38,29 +38,29 @@
   width: 100%;
   height: 100%;
   background: #f8f9fa;
-  border: 2px solid #e9ecef;
-  border-radius: 6px;
+  border: calc(var(--piece-base-size) * 0.03) solid #e9ecef;
+  border-radius: calc(var(--piece-base-size) * 0.1);
   transition: all 0.2s ease;
 }
 
 .piece-slot:hover {
   background: #f1f3f4;
   border-color: #dee2e6;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(calc(var(--piece-base-size) * -0.03));
+  box-shadow: 0 calc(var(--piece-base-size) * 0.03) calc(var(--piece-base-size) * 0.12) rgba(0, 0, 0, 0.1);
 }
 
 .selected-piece-info {
-  margin-top: 15px;
-  padding: 10px;
+  margin-top: calc(var(--piece-base-size) * 0.25);
+  padding: calc(var(--piece-base-size) * 0.15);
   background: #e8f5e8;
-  border-radius: 6px;
-  border-left: 4px solid #28a745;
+  border-radius: calc(var(--piece-base-size) * 0.1);
+  border-left: calc(var(--piece-base-size) * 0.06) solid #28a745;
 }
 
 .selected-piece-info p {
-  margin: 4px 0;
-  font-size: 0.9rem;
+  margin: calc(var(--piece-base-size) * 0.06) 0;
+  font-size: calc(var(--piece-base-size) * 0.15);
   color: #155724;
 }
 
@@ -77,49 +77,49 @@
 }
 
 .place-phase-info {
-  margin-top: 15px;
-  padding: 10px;
+  margin-top: calc(var(--piece-base-size) * 0.25);
+  padding: calc(var(--piece-base-size) * 0.15);
   background: #fff3cd;
-  border-radius: 6px;
-  border-left: 4px solid #ffc107;
+  border-radius: calc(var(--piece-base-size) * 0.1);
+  border-left: calc(var(--piece-base-size) * 0.06) solid #ffc107;
 }
 
 .place-phase-info p {
-  margin: 4px 0;
-  font-size: 0.9rem;
+  margin: calc(var(--piece-base-size) * 0.06) 0;
+  font-size: calc(var(--piece-base-size) * 0.15);
   color: #856404;
 }
 
 .game-over-info {
-  margin-top: 15px;
-  padding: 10px;
+  margin-top: calc(var(--piece-base-size) * 0.25);
+  padding: calc(var(--piece-base-size) * 0.15);
   background: #f8d7da;
-  border-radius: 6px;
-  border-left: 4px solid #dc3545;
+  border-radius: calc(var(--piece-base-size) * 0.1);
+  border-left: calc(var(--piece-base-size) * 0.06) solid #dc3545;
 }
 
 .game-over-info p {
-  margin: 4px 0;
-  font-size: 0.9rem;
+  margin: calc(var(--piece-base-size) * 0.06) 0;
+  font-size: calc(var(--piece-base-size) * 0.15);
   color: #721c24;
   font-weight: bold;
 }
 @media (max-width: 768px) {
   .pieces-grid {
-    width: 240px;
-    height: 240px;
-    gap: 6px;
-    padding: 2px;
+    width: calc(var(--piece-base-size) * 6);
+    height: calc(var(--piece-base-size) * 6);
+    gap: calc(var(--piece-base-size) * 0.1);
+    padding: calc(var(--piece-base-size) * 0.03);
   }
   
   .piece-slot {
-    width: 45px;
-    height: 45px;
+    width: calc(var(--piece-base-size) * 0.75);
+    height: calc(var(--piece-base-size) * 0.75);
   }
   
   .piece-set {
-    max-width: 250px;
-    padding: 6px;
+    max-width: calc(var(--piece-base-size) * 6.25);
+    padding: calc(var(--piece-base-size) * 0.1);
     width: fit-content;
   }
 }
