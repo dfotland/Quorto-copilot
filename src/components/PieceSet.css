@@ -19,13 +19,13 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 8px;
+  gap: var(--grid-gap);
   justify-items: center;
-  padding: 20px;
+  padding: var(--board-padding);
   min-width: 0;
   min-height: 0;
-  width: min(100cqw, 100cqh);
-  height: min(100cqw, 100cqh);
+  width: var(--pieces-grid-size);
+  height: var(--pieces-grid-size);
   aspect-ratio: 1;
   max-width: 100%;
   max-height: 100%;
@@ -66,12 +66,6 @@
 
 .selected-piece-info p:first-child {
   font-weight: bold;
-}
-
-/* Apply same piece styling as board pieces */
-.piece-slot .piece {
-  height: 80%;
-  margin-bottom: 10%;
 }
 
 .pieces-grid.disabled {

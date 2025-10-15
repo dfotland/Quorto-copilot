@@ -1,25 +1,21 @@
 /* Base piece styles */
 .piece {
-  --piece-base-size: 7vmin;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, filter 0.3s ease;
   cursor: default;
   position: relative;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
   animation: pieceEntry 0.4s ease-out;
   width: var(--piece-base-size);
   height: var(--piece-base-size);
+  padding-bottom: var(--piece-shadow-padding);
 }
 
 /* Height variations */
 .piece-tall {
   height: calc(var(--piece-base-size) * 2);
-}
-
-.piece-short .piece-body {
-  height: 50% !important;
 }
 
 @keyframes pieceEntry {
@@ -86,13 +82,8 @@
   z-index: 1;
 }
 
-.piece-short .piece-body {
-  height: 80%;
-}
-
 /* Shape variations - Square pieces */
 .piece-square .piece-body {
-  width: 80%;
   background: linear-gradient(135deg, currentColor 0%, color-mix(in srgb, currentColor 80%, black 20%) 100%) !important;
   border-radius: 6px;
   box-shadow: 
@@ -104,7 +95,6 @@
 
 /* Shape variations - Round pieces */
 .piece-round .piece-body {
-  width: 80%;
   background: radial-gradient(ellipse at 30% 30%, currentColor 0%, color-mix(in srgb, currentColor 70%, black 30%) 100%);
   border-radius: 50%;
   box-shadow: 
@@ -116,7 +106,6 @@
 
 /* Shape variations - Split pieces */
 .piece-split .piece-body {
-  width: 80%;
   background: linear-gradient(135deg, currentColor 0%, color-mix(in srgb, currentColor 80%, black 20%) 100%) !important;
   border-radius: 6px;
   box-shadow: 
