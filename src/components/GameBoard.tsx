@@ -44,12 +44,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ onCellClick, board, winningLine, 
   };
 
   return (
-    <div className="game-board">
-      <div className="board-grid">
-        {Array.from({ length: 4 }, (_, rowIndex) =>
-          Array.from({ length: 4 }, (_, colIndex) => renderCell(rowIndex, colIndex))
-        )}
-      </div>
+    <div className="board-grid">
+      {Array.from({ length: 4 }, (_, rowIndex) =>
+        Array.from({ length: 4 }, (_, colIndex) => renderCell(rowIndex, colIndex))
+      )}
     </div>
   );
 };

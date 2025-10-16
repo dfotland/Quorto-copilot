@@ -19,7 +19,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onOpenAIConfig
 }) => {
   return (
-    <div className="control-panel">
+    <div className="control-panel-area">
       <div className="game-buttons">
         <button className="new-game-button" onClick={onNewGame}>
           New Game

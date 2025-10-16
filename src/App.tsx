@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import GameBoard from './components/GameBoard';
-import PieceSet from './components/PieceSet';
 import Piece, { type PieceAttributes } from './components/Piece';
 import ControlPanel from './components/ControlPanel';
-import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine, formatPieceForLogging } from './utils/gameUtils';
+import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine, formatPieceForLogging, getPieceId } from './utils/gameUtils';
 import { MCTSSearch, createGameStateFromApp, type MCTSConfig, defaultMCTSConfig } from './ai/mcts';
 import { makeAIMove, type AIInput } from './ai';
 import './App.css';
@@ -312,9 +311,9 @@ function App() {
 
   const getGameStatusMessage = () => {
     if (gameState === 'won') {
-      return `🎉 Player ${winner} Wins! 🎉`;
+      return `Game Over`;
     } else if (gameState === 'tie') {
-      return `🤝 It's a Tie! 🤝`;
+      return `Game Over`;
     } else if (gamePhase === 'give') {
       return `Player ${currentPlayer}: Select an available piece for Player ${currentPlayer === 1 ? 2 : 1} to place`;
     } else {
@@ -359,13 +358,30 @@ function App() {
         {/* Available Pieces - Right 2 columns, middle row */}
         <div className="available-pieces-area">
           <h3>Available Pieces ({availablePieces.length}/16)</h3>
-          <PieceSet 
-            availablePieces={availablePieces}
-            selectedPiece={selectedPiece}
-            onPieceSelect={handlePieceSelect}
-            gamePhase={gamePhase}
-            gameOver={gameState !== 'playing'}
-          />
+          <div className={`pieces-grid ${(gamePhase !== 'give' || gameState !== 'playing') ? 'disabled' : ''}`}>
+            {generateAllPieces().map((piece, index) => {
+              const pieceId = getPieceId(piece);
+              const isAvailable = availablePieces.some(availablePiece => getPieceId(availablePiece) === pieceId);
+              const isSelected = !!(selectedPiece && 
+                piece.height === selectedPiece.height &&
+                piece.color === selectedPiece.color &&
+                piece.shape === selectedPiece.shape &&
+                piece.top === selectedPiece.top);
+              const canSelectPieces = gamePhase === 'give' && gameState === 'playing';
+              
+              return (
+                <div key={index} className="piece-slot">
+                  {isAvailable ? (
+                    <Piece
+                      attributes={piece}
+                      onClick={canSelectPieces ? () => handlePieceSelect(piece) : undefined}
+                      isSelected={isSelected}
+                    />
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
 
@@ -383,30 +399,26 @@ function App() {
         {/* Game Message Area - Fourth row, first column */}
         <div className="game-message-area">
           <div className="current-player-info">
-            <p className={`player-status ${gameState !== 'playing' ? 'game-over-status' : ''}`}>{getGameStatusMessage()}</p>
+            {gameState === 'won' && (
+              <p className="player-status winner-announcement">🎉 Player {winner} wins! 🎉</p>
+            )}
+            {gameState === 'tie' && (
+              <p className="player-status tie-announcement">It's a tie! 🤝</p>
+            )}
+            {gameState === 'playing' && (
+              <p className="player-status">{getGameStatusMessage()}</p>
+            )}
           </div>
-          {gameState === 'playing' && (
-            <div className="staging-circle">
-              {stagedPiece ? (
-                <div className="staged-piece">
-                  <Piece attributes={stagedPiece} />
-                </div>
-              ) : (
-                <div className="staging-empty">
-                </div>
-              )}
-            </div>
-          )}
-          {gameState === 'won' && (
-            <div className="winner-announcement">
-              🎉 Player {winner} wins! 🎉
-            </div>
-          )}
-          {gameState === 'tie' && (
-            <div className="tie-announcement">
-              It's a tie! 🤝
-            </div>
-          )}
+          <div className="staging-area">
+            {stagedPiece ? (
+              <div className="staged-piece">
+                <Piece attributes={stagedPiece} />
+              </div>
+            ) : (
+              <div className="staging-empty">
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

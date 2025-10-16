@@ -1,5 +1,5 @@
 /* Control Panel Component */
-.control-panel {
+.control-panel-area {
   grid-area: controls;
   background: rgba(255, 255, 255, 0.9);
   border-radius: var(--board-border-radius);
@@ -7,7 +7,7 @@
   box-shadow: 0 var(--shadow-small) var(--board-border-radius) rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-evenly;
   align-items: center;
   gap: var(--spacing-xxl);
   min-height: var(--min-height-standard);
@@ -22,7 +22,7 @@
   padding: var(--spacing-medium) var(--spacing-xl);
   border: none;
   border-radius: var(--spacing-medium);
-  font-size: var(--font-medium);
+  font-size: var(--font-large);
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -45,7 +45,7 @@
 
 .ai-players {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: var(--spacing-large);
   justify-content: center;
 }
@@ -88,7 +88,7 @@
 
 /* Mobile Responsive Design */
 @media (max-width: 600px) {
-  .control-panel {
+  .control-panel-area {
     flex-direction: column;
     gap: var(--spacing-large);
     min-height: auto;
@@ -99,17 +99,5 @@
   .game-buttons {
     justify-content: center;
   }
-  
-  .ai-controls {
-    align-items: center;
-  }
-  
-  .ai-players {
-    flex-direction: row;
-    gap: var(--spacing-large);
-  }
-  
-  .ai-player label {
-    font-size: var(--font-small);
-  }
 }
+  
