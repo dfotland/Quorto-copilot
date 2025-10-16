@@ -650,7 +650,7 @@ function App() {
                 <ul>
                   <li><strong>Human vs Human:</strong> Play against a friend locally</li>
                   <li><strong>AI Opponents:</strong> Challenge yourself against computer players</li>
-                  <li><strong>Basic AI:</strong> Uses heuristic-based decision making with configurable difficulty levels that adjust strategic thinking and randomness</li>
+                  <li><strong>Basic AI:</strong> Uses heuristic-based decision making with configurable difficulty levels that adjust strategic thinking and randomness with minimal lookahead</li>
                 </ul>
               </div>
               
@@ -661,7 +661,6 @@ function App() {
                   <li>React 19 with TypeScript</li>
                   <li>Vite for fast development</li>
                   <li>CSS Grid for responsive layout</li>
-                  <li>Strategic AI algorithms</li>
                 </ul>
               </div>
               
@@ -670,8 +669,8 @@ function App() {
                 <ul>
                   <li>Study the available pieces before making your selection</li>
                   <li>Try the different AI difficulty levels to improve your skills</li>
-                  <li>Watch for patterns and potential winning lines</li>
-                  <li>Think ahead - consider what pieces you'll have to give your opponent</li>
+                  <li>Don't give your opponent a piece they can play to win</li>
+                  <li>Place your piece to limit your opponent's choices</li>
                 </ul>
               </div>
               

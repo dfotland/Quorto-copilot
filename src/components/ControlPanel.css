@@ -22,7 +22,7 @@
   padding: var(--spacing-medium) var(--spacing-xl);
   border: none;
   border-radius: var(--spacing-medium);
-  font-size: var(--font-large);
+  font-size: var(--font-xxl);
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
