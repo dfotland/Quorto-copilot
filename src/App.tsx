@@ -3,7 +3,6 @@ import GameBoard from './components/GameBoard';
 import Piece, { type PieceAttributes } from './components/Piece';
 import ControlPanel from './components/ControlPanel';
 import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine, formatPieceForLogging, getPieceId } from './utils/gameUtils';
-import { MCTSSearch, createGameStateFromApp, type MCTSConfig, defaultMCTSConfig } from './ai/mcts';
 import { makeAIMove, type AIInput } from './ai';
 import './App.css';
 
@@ -33,11 +32,8 @@ function App() {
   // AI controls
   const [player1AI, setPlayer1AI] = useState<boolean>(false);
   const [player2AI, setPlayer2AI] = useState<boolean>(false);
-  const [aiType, setAiType] = useState<'basic' | 'mcts'>('basic');
   const [basicAIDifficulty, setBasicAIDifficulty] = useState<'easy' | 'normal' | 'hard' | 'nightmare'>('easy');
-  
-  // MCTS Configuration
-  const [mctsConfig, setMctsConfig] = useState<MCTSConfig>(defaultMCTSConfig);
+  const [enableAILogging, setEnableAILogging] = useState<boolean>(false);
   
   // Track game state
   const [gameState, setGameState] = useState<GameState>('playing');
@@ -155,19 +151,14 @@ function App() {
     console.log(`🎯 Staged piece available: ${formatPieceForDisplay(stagedPiece)} ${stagedPiece ? `(height:${stagedPiece.height}, color:${stagedPiece.color}, shape:${stagedPiece.shape}, top:${stagedPiece.top})` : ''}`);
     console.log(`🎯 Available pieces count: ${availablePieces.length}`);
 
-    let aiMove;
-    if (aiType === 'basic') {
-      aiMove = executeBasicAIMove();
-    } else if (aiType === 'mcts') {
-      aiMove = executeMCTSMove();
-    }
+    const aiMove = executeBasicAIMove();
 
     // Apply the AI move to the game state
     if (aiMove) {
       applyAIMove(aiMove);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState, currentPlayer, player1AI, player2AI, gamePhase, stagedPiece, availablePieces, aiType]);
+  }, [gameState, currentPlayer, player1AI, player2AI, gamePhase, stagedPiece, availablePieces]);
 
   // Apply an AI move to the game state
   const applyAIMove = (aiMove: { placement?: { row: number; col: number } | null; pieceToGive?: PieceAttributes | null }) => {
@@ -233,7 +224,7 @@ function App() {
       board,
       pieceToPlace: stagedPiece,
       availablePieces,
-      enableLogging: mctsConfig.enableLogging, // Use the same logging flag as MCTS
+      enableLogging: enableAILogging,
       difficulty: basicAIDifficulty
     };
 
@@ -253,34 +244,6 @@ function App() {
     return {
       placement: aiMove.placement,
       pieceToGive: aiMove.pieceToGive
-    };
-  };
-
-  const executeMCTSMove = () => {
-    console.log(`🤖 MCTS AI (Player ${currentPlayer}) is thinking...`);
-    
-    const gameStateForMCTS = createGameStateFromApp(
-      board,
-      availablePieces,
-      stagedPiece,
-      currentPlayer,
-      gameState !== 'playing',
-      winner
-    );
-
-    const mcts = new MCTSSearch(mctsConfig);
-    const bestMove = mcts.search(gameStateForMCTS);
-
-    // Helper function to format piece for logging
-    const formatPiece = (piece: PieceAttributes) => 
-      `${piece.height[0]}${piece.color[0]}${piece.shape[0]}${piece.top[0]}`;
-
-    console.log(`🎯 MCTS AI selected move: ${bestMove.place ? `place at (${bestMove.place[1]},${bestMove.place[0]})` : 'no placement'}, ${bestMove.give ? `give piece ${formatPiece(bestMove.give)}` : 'no piece to give'}`);
-
-    // Convert MCTS move format to common AI move format
-    return {
-      placement: bestMove.place ? { row: bestMove.place[0], col: bestMove.place[1] } : undefined,
-      pieceToGive: bestMove.give
     };
   };
 
@@ -307,7 +270,7 @@ function App() {
         pendingExecutionRef.current = false;
       };
     }
-  }, [currentPlayer, gamePhase, gameState, player1AI, player2AI, aiType, executeAIMove]);
+  }, [currentPlayer, gamePhase, gameState, player1AI, player2AI, executeAIMove]);
 
   const getGameStatusMessage = () => {
     if (gameState === 'won') {
@@ -437,128 +400,62 @@ function App() {
             </div>
             
             <div className="modal-content">
-              <div className="ai-type-selection">
-                <label>
-                  <input
-                    type="radio"
-                    name="aiType"
-                    value="basic"
-                    checked={aiType === 'basic'}
-                    onChange={(e) => setAiType(e.target.value as 'basic' | 'mcts')}
-                  />
-                  Basic AI
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="aiType"
-                    value="mcts"
-                    checked={aiType === 'mcts'}
-                    onChange={(e) => setAiType(e.target.value as 'basic' | 'mcts')}
-                  />
-                  MCTS AI
-                </label>
-              </div>
-              
-              {aiType === 'basic' && (
-                <div className="basic-ai-config">
-                  <label>Basic AI Difficulty:</label>
-                  <div className="difficulty-selection">
-                    <label className={basicAIDifficulty === 'easy' ? 'selected' : ''}>
-                      <input
-                        type="radio"
-                        name="basicAIDifficulty"
-                        value="easy"
-                        checked={basicAIDifficulty === 'easy'}
-                        onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
-                      />
-                      <span>Easy</span>
-                    </label>
-                    <label className={basicAIDifficulty === 'normal' ? 'selected' : ''}>
-                      <input
-                        type="radio"
-                        name="basicAIDifficulty"
-                        value="normal"
-                        checked={basicAIDifficulty === 'normal'}
-                        onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
-                      />
-                      <span>Normal</span>
-                    </label>
-                    <label className={basicAIDifficulty === 'hard' ? 'selected' : ''}>
-                      <input
-                        type="radio"
-                        name="basicAIDifficulty"
-                        value="hard"
-                        checked={basicAIDifficulty === 'hard'}
-                        onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
-                      />
-                      <span>Hard</span>
-                    </label>
-                    <label className={basicAIDifficulty === 'nightmare' ? 'selected' : ''}>
-                      <input
-                        type="radio"
-                        name="basicAIDifficulty"
-                        value="nightmare"
-                        checked={basicAIDifficulty === 'nightmare'}
-                        onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
-                      />
-                      <span>Nightmare</span>
-                    </label>
-                  </div>
+              <div className="basic-ai-config">
+                <label>AI Difficulty:</label>
+                <div className="difficulty-selection">
+                  <label className={basicAIDifficulty === 'easy' ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="basicAIDifficulty"
+                      value="easy"
+                      checked={basicAIDifficulty === 'easy'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                    />
+                    <span>Easy</span>
+                  </label>
+                  <label className={basicAIDifficulty === 'normal' ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="basicAIDifficulty"
+                      value="normal"
+                      checked={basicAIDifficulty === 'normal'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                    />
+                    <span>Normal</span>
+                  </label>
+                  <label className={basicAIDifficulty === 'hard' ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="basicAIDifficulty"
+                      value="hard"
+                      checked={basicAIDifficulty === 'hard'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                    />
+                    <span>Hard</span>
+                  </label>
+                  <label className={basicAIDifficulty === 'nightmare' ? 'selected' : ''}>
+                    <input
+                      type="radio"
+                      name="basicAIDifficulty"
+                      value="nightmare"
+                      checked={basicAIDifficulty === 'nightmare'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                    />
+                    <span>Nightmare</span>
+                  </label>
                 </div>
-              )}
+              </div>
               
               <div className="config-group">
                 <label>
                   <input
                     type="checkbox"
-                    checked={mctsConfig.enableLogging}
-                    onChange={(e) => setMctsConfig({
-                      ...mctsConfig,
-                      enableLogging: e.target.checked
-                    })}
+                    checked={enableAILogging}
+                    onChange={(e) => setEnableAILogging(e.target.checked)}
                   />
                   Enable AI Logging (check console)
                 </label>
               </div>
-              
-              {aiType === 'mcts' && (
-                <div className="mcts-config">
-                  <div className="config-group">
-                    <label>
-                      Max Iterations: {mctsConfig.maxIterations}
-                      <input
-                        type="range"
-                        min="50"
-                        max="2000"
-                        step="50"
-                        value={mctsConfig.maxIterations}
-                        onChange={(e) => setMctsConfig({
-                          ...mctsConfig,
-                          maxIterations: parseInt(e.target.value)
-                        })}
-                      />
-                    </label>
-                  </div>
-                  
-                  <div className="config-group">
-                    <label>
-                      Max Depth: {mctsConfig.maxDepth}
-                      <input
-                        type="range"
-                        min="1"
-                        max="8"
-                        step="1"
-                        value={mctsConfig.maxDepth}
-                        onChange={(e) => setMctsConfig({
-                          ...mctsConfig,
-                          maxDepth: parseInt(e.target.value)
-                        })}
-                      />
-                    </label>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

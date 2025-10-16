@@ -6,14 +6,14 @@
   transition: transform 0.3s ease, filter 0.3s ease;
   cursor: default;
   position: relative;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
   animation: pieceEntry 0.4s ease-out;
   width: var(--piece-base-size);
   height: var(--piece-base-size);
   padding-bottom: var(--piece-shadow-padding);
 }
 
-/* Height variations */
+/* Height replaces the value in .piece */
 .piece-tall {
   height: calc(var(--piece-base-size) * 2);
 }
@@ -43,7 +43,7 @@
   filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.8)) drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
 }
 
-/* Piece body */
+/* Piece body with 3-d shading effect */
 .piece-body {
   display: flex;
   flex-direction: column;
@@ -115,6 +115,11 @@
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
 
+/* Round split pieces should maintain round shape */
+.piece-round.piece-split .piece-body {
+  border-radius: 50%;
+}
+
 /* Color variations */
 .piece-light {
   color: #F5DEB3; /* Wheat color */
@@ -148,20 +153,6 @@
   border: 1px solid rgba(0, 0, 0, 0.15);
 }
 
-/* Enhanced 3D shadow effect */
-.piece-body::after {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 95%;
-  height: 6px;
-  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 50%, transparent 100%);
-  border-radius: 50%;
-  z-index: -1;
-  filter: blur(1px);
-}
 
 /* Add subtle reflection effect */
 .piece-body::before {
