@@ -1,3 +1,20 @@
+/* Game Board Area */
+.game-board-area {
+  grid-area: board;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--board-border-radius);
+  padding: var(--spacing-small);
+  box-shadow: 0 var(--shadow-small) var(--board-border-radius) rgba(0, 0, 0, 0.1);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  container-type: size;
+}
+
 .board-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

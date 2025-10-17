@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import GameBoard from './components/GameBoard';
 import Piece, { type PieceAttributes } from './components/Piece';
 import ControlPanel from './components/ControlPanel';
-import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine, formatPieceForLogging, getPieceId } from './utils/gameUtils';
+import PieceSet from './components/PieceSet';
+import { generateAllPieces, arePiecesEqual, checkWinCondition, isBoardFull, getWinningLine, formatPieceForLogging } from './utils/gameUtils';
 import { makeAIMove, type AIInput } from './ai';
 import './App.css';
 
@@ -321,41 +322,20 @@ function App() {
         {/* Available Pieces - Right 2 columns, middle row */}
         <div className="available-pieces-area">
           <h3>Available Pieces ({availablePieces.length}/16)</h3>
-          <div className={`pieces-grid ${(gamePhase !== 'give' || gameState !== 'playing') ? 'disabled' : ''}`}>
-            {generateAllPieces().map((piece, index) => {
-              const pieceId = getPieceId(piece);
-              const isAvailable = availablePieces.some(availablePiece => getPieceId(availablePiece) === pieceId);
-              const isSelected = !!(selectedPiece && 
-                piece.height === selectedPiece.height &&
-                piece.color === selectedPiece.color &&
-                piece.shape === selectedPiece.shape &&
-                piece.top === selectedPiece.top);
-              const canSelectPieces = gamePhase === 'give' && gameState === 'playing';
-              
-              return (
-                <div key={index} className="piece-slot">
-                  {isAvailable ? (
-                    <Piece
-                      attributes={piece}
-                      onClick={canSelectPieces ? () => handlePieceSelect(piece) : undefined}
-                      isSelected={isSelected}
-                    />
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
+          <PieceSet
+            availablePieces={availablePieces}
+            selectedPiece={selectedPiece}
+            onPieceSelect={handlePieceSelect}
+            gamePhase={gamePhase}
+            gameOver={gameState !== 'playing'}
+          />
         </div>
 
 
 
         {/* Control Panel - Right column, bottom row */}
         <ControlPanel
-          player1AI={player1AI}
-          player2AI={player2AI}
           onNewGame={startNewGame}
-          onTogglePlayer1AI={(checked) => setPlayer1AI(checked)}
-          onTogglePlayer2AI={(checked) => setPlayer2AI(checked)}
           onOpenAIConfig={() => setShowAIConfig(true)}
         />
 
@@ -400,6 +380,32 @@ function App() {
             </div>
             
             <div className="modal-content">
+              <div className="ai-players-modal">
+                <label>AI Players:</label>
+                <div className="ai-players-row">
+                  <div className="ai-player-modal">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={player1AI}
+                        onChange={(e) => setPlayer1AI(e.target.checked)}
+                      />
+                      Player 1 AI
+                    </label>
+                  </div>
+                  <div className="ai-player-modal">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={player2AI}
+                        onChange={(e) => setPlayer2AI(e.target.checked)}
+                      />
+                      Player 2 AI
+                    </label>
+                  </div>
+                </div>
+              </div>
+              
               <div className="basic-ai-config">
                 <label>AI Difficulty:</label>
                 <div className="difficulty-selection">
