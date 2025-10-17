@@ -87,13 +87,11 @@
 }
 
 /* Mobile Responsive Design */
-@media (max-width: 600px) {
+@media (orientation: portrait) {
   .control-panel-area {
-    flex-direction: column;
     gap: var(--spacing-large);
     min-height: auto;
     padding: var(--spacing-large) var(--spacing-xxl);
-    align-items: stretch;
   }
   
   .game-buttons {

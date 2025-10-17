@@ -1,6 +1,9 @@
 /* Global CSS Variables */
 :root {
-  --piece-base-size: 6vmin;
+  --piece-base-size: min(6vh, 4.5vw);
+  @media (orientation: portrait) {
+    --piece-base-size: 3vh;
+  }
   
   /* Basic sizing multipliers */
   --piece-shadow-padding: calc(var(--piece-base-size) * 0.1);
@@ -8,7 +11,7 @@
   --pieces-grid-size: calc(var(--piece-base-size) * 9);
   --board-padding: calc(var(--piece-base-size) * 0.3);
   --board-border-radius: calc(var(--piece-base-size) * 0.2);
-  --header-height: calc(var(--piece-base-size) * 1.2);
+  --header-height: calc(var(--piece-base-size) * 1);
   --grid-gap: calc(var(--piece-base-size) * 0.1);
   
   /* Typography sizes */
@@ -52,7 +55,7 @@
 .app {
   height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 10px;
+  padding: calc(var(--piece-base-size) * 0.3);
   box-sizing: border-box;
   display: flex;
   align-items: stretch;
@@ -65,8 +68,8 @@
 .game-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr auto;
-  gap: 15px;
+  grid-template-rows: auto auto auto;
+  gap: calc(var(--piece-base-size) * 0.2);
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -86,14 +89,14 @@
   border-radius: var(--board-border-radius);
   padding: calc(var(--header-height) * 0.15) calc(var(--header-height) * 0.3);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  height: var(--header-height);
+  height: 100%;
   box-sizing: border-box;
 }
 
 .header h1 {
   margin: 0;
   color: #333;
-  font-size: calc(var(--header-height) * 0.6);
+  font-size: calc(var(--header-height) * 0.8);
   font-family: 'Times New Roman', 'Georgia', serif;
   font-weight: bold;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -113,7 +116,7 @@
   color: white;
   border: none;
   border-radius: calc(var(--header-height) * 0.1);
-  font-size: calc(var(--header-height) * 0.2);
+  font-size: var(--font-medium);
   font-weight: 500;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
@@ -137,7 +140,7 @@
   border-radius: var(--board-border-radius);
   padding: var(--spacing-small);
   box-shadow: 0 var(--shadow-small) var(--board-border-radius) rgba(0, 0, 0, 0.1);
-  min-width: min(50vw, 60vh);
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
   container-type: size;
@@ -531,100 +534,35 @@
   font-weight: 600;
 }
 
-/* Responsive Design */
-@media (max-width: 1000px) {
+/* Portrait orientation - vertical stacking */
+@media (orientation: portrait) {
   .game-grid {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto auto;
     grid-template-areas:
       "header"
       "board"
-      "pieces"
       "message"
-      "controls";
-    gap: 12px;
-  }
-
-  .header h1 {
-    font-size: 2rem;
-  }
-  
-  .header-button {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    min-width: 60px;
-  }
-  
-  /* Reduce padding in responsive layouts to save space */
-  .available-pieces-area,
-  .game-board-area {
-    padding: var(--spacing-medium);
-  }
-}
-
-@media (max-width: 600px) {
-  .game-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr auto auto;
-    grid-template-areas:
-      "header"
-      "board"
       "pieces"
-      "message"
       "controls";
-    gap: 10px;
-  }
-
-  .header h1 {
-    font-size: 1.5rem;
-  }
-  
-  .header {
-    padding: 10px 15px;
-  }
-  
-  .header-button {
-    padding: 6px 10px;
-    font-size: 0.75rem;
-    min-width: 50px;
-  }
-  
-  .header-buttons {
-    gap: 8px;
-  }
-
-  .ai-type-selection {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .difficulty-selection {
-    flex-direction: column;
-  }
-  
-  /* Further reduce padding and gaps for mobile */
-  .available-pieces-area,
-  .game-board-area {
-    padding: var(--spacing-small);
-  }
-  
-  .pieces-grid {
-    width: calc(var(--piece-base-size) * 6);
-    height: calc(var(--piece-base-size) * 6);
     gap: calc(var(--piece-base-size) * 0.1);
-    padding: calc(var(--piece-base-size) * 0.03);
   }
   
-  .piece-slot {
-    width: calc(var(--piece-base-size) * 0.75);
-    height: calc(var(--piece-base-size) * 0.75);
+  .game-board-area {
+    min-height: calc(var(--piece-base-size) * 10);
+  }
+
+  .app {
+    padding: calc(var(--piece-base-size) * 0.1);
   }
   
-  /* Adjust game message area for mobile */
+  .available-pieces-area {
+    min-height: calc(var(--piece-base-size) * 9);
+  }
+  
   .game-message-area {
-    padding: calc(var(--piece-base-size) * 0.15) calc(var(--piece-base-size) * 0.25);
-    min-height: calc(var(--piece-base-size) * 1);
-    gap: calc(var(--piece-base-size) * 0.25);
+    /* min-height: calc(var(--piece-base-size) * 0.8); */
+    padding: calc(var(--piece-base-size) * 0.1) calc(var(--piece-base-size) * 0.2);
   }
 }
 

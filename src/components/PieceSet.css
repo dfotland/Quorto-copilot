@@ -104,22 +104,3 @@
   color: #721c24;
   font-weight: bold;
 }
-@media (max-width: 768px) {
-  .pieces-grid {
-    width: calc(var(--piece-base-size) * 6);
-    height: calc(var(--piece-base-size) * 6);
-    gap: calc(var(--piece-base-size) * 0.1);
-    padding: calc(var(--piece-base-size) * 0.03);
-  }
-  
-  .piece-slot {
-    width: calc(var(--piece-base-size) * 0.75);
-    height: calc(var(--piece-base-size) * 0.75);
-  }
-  
-  .piece-set {
-    max-width: calc(var(--piece-base-size) * 6.25);
-    padding: calc(var(--piece-base-size) * 0.1);
-    width: fit-content;
-  }
-}
