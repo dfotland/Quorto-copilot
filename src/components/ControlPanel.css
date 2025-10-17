@@ -3,7 +3,7 @@
   grid-area: controls;
   background: rgba(255, 255, 255, 0.9);
   border-radius: var(--board-border-radius);
-  padding: var(--spacing-xl) var(--spacing-xxl);
+  padding: 0 var(--spacing-xxl);
   box-shadow: 0 var(--shadow-small) var(--board-border-radius) rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: row;
@@ -22,7 +22,7 @@
   padding: var(--spacing-medium) var(--spacing-xl);
   border: none;
   border-radius: var(--spacing-medium);
-  font-size: var(--font-xxl);
+  font-size: var(--font-xl);
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -89,9 +89,7 @@
 /* Mobile Responsive Design */
 @media (orientation: portrait) {
   .control-panel-area {
-    gap: var(--spacing-large);
     min-height: auto;
-    padding: var(--spacing-large) var(--spacing-xxl);
   }
   
   .game-buttons {

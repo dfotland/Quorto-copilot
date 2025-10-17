@@ -642,7 +642,7 @@ export function moveToString(move: Move): string {
   if (move.give) {
     const piece = move.give;
     const height = piece.height === 'tall' ? 'T' : 's';
-    const top = piece.top === 'solid' ? 'F' : 'h';
+    // fix later const top = piece.top === 'solid' ? 'F' : 'h';
     const color = piece.color === 'dark' ? 'D' : 'l';
     const shape = piece.shape === 'square' ? 'S' : 'r';
     result += ` give: ${height}${top}${color}${shape}`;
