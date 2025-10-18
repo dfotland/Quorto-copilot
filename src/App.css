@@ -23,6 +23,7 @@
   --font-xl: calc(var(--piece-base-size) * 0.6);
   --font-xxl: calc(var(--piece-base-size) * 0.75);
   --font-huge: calc(var(--piece-base-size) * 1);
+  --font-close-button: calc(var(--piece-base-size) * 0.7); /* Font size for modal close button × */
   
   /* Spacing sizes */
   --spacing-tiny: calc(var(--piece-base-size) * 0.03);
@@ -281,7 +282,7 @@
 .close-button {
   background: none;
   border: none;
-  font-size: var(--font-medium);
+  font-size: var(--font-close-button);
   cursor: pointer;
   color: #666;
   width: calc(var(--piece-base-size) * 0.5);
@@ -291,6 +292,18 @@
   justify-content: center;
   border-radius: 50%;
   transition: background-color 0.2s;
+  outline: none;
+  box-shadow: none;
+}
+
+.close-button:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.close-button:active {
+  outline: none;
+  box-shadow: none;
 }
 
 .close-button:hover {
