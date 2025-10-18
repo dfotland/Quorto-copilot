@@ -3,7 +3,7 @@
   /* controls the amount of vertical space allocated to the board and pieces. everything else should scale from these */
   --piece-base-size: min(6.4vh, 4.5vw);
   @media (orientation: portrait) {
-    --piece-base-size: 3.8vh;
+    --piece-base-size: 3.8dvh;
   }
   
   /* Basic sizing multipliers */
