@@ -31,9 +31,9 @@ function App() {
   const [gamePhase, setGamePhase] = useState<GamePhase>('give');
   
   // AI controls
-  const [player1AI, setPlayer1AI] = useState<boolean>(false);
+  const [player1AI, setPlayer1AI] = useState<boolean>(true);
   const [player2AI, setPlayer2AI] = useState<boolean>(false);
-  const [basicAIDifficulty, setBasicAIDifficulty] = useState<'easy' | 'normal' | 'hard' | 'nightmare'>('easy');
+  const [basicAIDifficulty, setBasicAIDifficulty] = useState<'easy' | 'normal' | 'hard' | 'brutal'>('easy');
   const [enableAILogging, setEnableAILogging] = useState<boolean>(false);
   
   // Track game state
@@ -382,27 +382,25 @@ function App() {
             <div className="modal-content">
               <div className="ai-players-modal">
                 <label>AI Players:</label>
-                <div className="ai-players-row">
-                  <div className="ai-player-modal">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={player1AI}
-                        onChange={(e) => setPlayer1AI(e.target.checked)}
-                      />
-                      Player 1 AI
-                    </label>
-                  </div>
-                  <div className="ai-player-modal">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={player2AI}
-                        onChange={(e) => setPlayer2AI(e.target.checked)}
-                      />
-                      Player 2 AI
-                    </label>
-                  </div>
+                <div className="ai-player-modal">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={player1AI}
+                      onChange={(e) => setPlayer1AI(e.target.checked)}
+                    />
+                    Player 1
+                  </label>
+                </div>
+                <div className="ai-player-modal">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={player2AI}
+                      onChange={(e) => setPlayer2AI(e.target.checked)}
+                    />
+                    Player 2
+                  </label>
                 </div>
               </div>
               
@@ -415,7 +413,7 @@ function App() {
                       name="basicAIDifficulty"
                       value="easy"
                       checked={basicAIDifficulty === 'easy'}
-                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'brutal')}
                     />
                     <span>Easy</span>
                   </label>
@@ -425,7 +423,7 @@ function App() {
                       name="basicAIDifficulty"
                       value="normal"
                       checked={basicAIDifficulty === 'normal'}
-                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'brutal')}
                     />
                     <span>Normal</span>
                   </label>
@@ -435,19 +433,19 @@ function App() {
                       name="basicAIDifficulty"
                       value="hard"
                       checked={basicAIDifficulty === 'hard'}
-                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'brutal')}
                     />
                     <span>Hard</span>
                   </label>
-                  <label className={basicAIDifficulty === 'nightmare' ? 'selected' : ''}>
+                  <label className={basicAIDifficulty === 'brutal' ? 'selected' : ''}>
                     <input
                       type="radio"
                       name="basicAIDifficulty"
-                      value="nightmare"
-                      checked={basicAIDifficulty === 'nightmare'}
-                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'nightmare')}
+                      value="brutal"
+                      checked={basicAIDifficulty === 'brutal'}
+                      onChange={(e) => setBasicAIDifficulty(e.target.value as 'easy' | 'normal' | 'hard' | 'brutal')}
                     />
-                    <span>Nightmare</span>
+                    <span>Brutal</span>
                   </label>
                 </div>
               </div>

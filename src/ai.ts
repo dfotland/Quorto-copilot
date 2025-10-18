@@ -6,17 +6,43 @@ export interface BoardPosition {
   col: number;
 }
 
+export interface AIInput {
+  currentPlayer: 1 | 2;
+  gamePhase: 'give' | 'place';
+  board: (PieceAttributes | null)[][];
+  pieceToPlace?: PieceAttributes | null;
+  availablePieces: PieceAttributes[];
+  enableLogging?: boolean;
+  difficulty?: 'easy' | 'normal' | 'hard' | 'brutal'; // AI difficulty level
+}
+
+export interface AIOutput {
+  selectedPiece?: PieceAttributes | null;
+  placementPosition?: BoardPosition | null;
+  reasoning?: string;
+}
+
+/**
+ * Get random chance based on difficulty level
+ */
+function getRandomChance(difficulty: 'easy' | 'normal' | 'hard' | 'brutal'): number {
+  switch (difficulty) {
+    case 'easy': return 0.4;     // 40% chance of random moves
+    case 'normal': return 0.2;   // 20% chance of random moves  
+    case 'hard': return 0.05;    // 5% chance of random moves
+    case 'brutal': return 0;      // 0% chance of random moves (always optimal)
+    default: return 0.2;
+  }
+}
+
+export interface BoardPosition {
+  row: number;
+  col: number;
+}
+
 export interface AIMove {
   placement: BoardPosition | null; // null if no piece to place (first move)
   pieceToGive: PieceAttributes | null; // null if game ends with winning placement
-}
-
-export interface AIInput {
-  board: (PieceAttributes | null)[][];
-  pieceToPlace: PieceAttributes | null; // null for first move
-  availablePieces: PieceAttributes[];
-  enableLogging?: boolean; // Optional logging flag
-  difficulty?: 'easy' | 'normal' | 'hard' | 'nightmare'; // AI difficulty level
 }
 
 /**
@@ -42,19 +68,6 @@ function getEmptyPositions(board: (PieceAttributes | null)[][]): BoardPosition[]
 function getRandomElement<T>(array: T[]): T {
   const randomIndex = Math.floor(Math.random() * array.length);
   return array[randomIndex];
-}
-
-/**
- * Get random chance based on difficulty level
- */
-function getRandomChance(difficulty: 'easy' | 'normal' | 'hard' | 'nightmare'): number {
-  switch (difficulty) {
-    case 'easy': return 0.6;     // 60% chance of random moves
-    case 'normal': return 0.3;   // 30% chance of random moves
-    case 'hard': return 0;     // 10% chance of random moves
-    case 'nightmare': return 0;  // 0% chance of random moves (always optimal)
-    default: return 0.3;
-  }
 }
 
 /**
@@ -93,7 +106,7 @@ function canPieceLeadToWin(piece: PieceAttributes, board: (PieceAttributes | nul
 
 /**
  * AI function to place a piece on the board
- * Difficulty affects strategy: easy makes some random moves, nightmare is always optimal
+ * Difficulty affects strategy: easy makes some random moves, brutal is always optimal
  */
 export function makeAIPlacement(input: AIInput): BoardPosition | null {
   const { board, pieceToPlace, enableLogging, difficulty = 'normal' } = input;
@@ -124,11 +137,11 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
   }
 
   // Map difficulty levels to win check skip probabilities
-  const winCheckSkipMap: Record<'easy' | 'normal' | 'hard' | 'nightmare', number> = {
+  const winCheckSkipMap: Record<'easy' | 'normal' | 'hard' | 'brutal', number> = {
     easy: 0.2,
     normal: 0.05,
     hard: 0.01,
-    nightmare: 0
+    brutal: 0
   };
   
   const shouldSkipWinCheck = Math.random() < winCheckSkipMap[difficulty];
@@ -169,12 +182,12 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
   }
 
   // Set minimum safe pieces threshold based on difficulty
-  const getMinSafePieces = (difficulty: 'easy' | 'normal' | 'hard' | 'nightmare'): number => {
+  const getMinSafePieces = (difficulty: 'easy' | 'normal' | 'hard' | 'brutal'): number => {
     switch (difficulty) {
       case 'easy': return 2;
       case 'normal': return 2;
       case 'hard': return 3;
-      case 'nightmare': return 8;
+      case 'brutal': return 8;
       default: return 2;
     }
   };
@@ -182,7 +195,7 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
   const minSafePieces = getMinSafePieces(difficulty);
   let bestPositions: BoardPosition[] = [];
   let maxSafePieces = -1;
-  let positionsAboveThreshold: BoardPosition[] = [];
+  const positionsAboveThreshold: BoardPosition[] = [];
 
   for (const position of emptyPositions) {
     const testBoard = board.map(row => [...row]);

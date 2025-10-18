@@ -3,7 +3,6 @@
   grid-area: controls;
   background: rgba(255, 255, 255, 0.9);
   border-radius: var(--board-border-radius);
-  /*padding: 0 var(--spacing-xxl); */
   box-shadow: 0 var(--shadow-small) var(--board-border-radius) rgba(0, 0, 0, 0.1);
   gap: var(--spacing-xxl);
   min-height: var(--min-height-standard);
@@ -17,6 +16,7 @@
   font-weight: bold;
   width: 100%;
   height: 100%;
+  /* padding: var(--spacing-xl); */
 }
 
 .new-game-button {
@@ -60,9 +60,11 @@
   }
   .new-game-button {
     font-size: var(--font-medium);
+  padding: var(--spacing-small) var(--spacing-small);
   }
 
   .ai-config-button {
     font-size: var(--font-medium);
+    padding: var(--spacing-small) var(--spacing-small);
   }
 }

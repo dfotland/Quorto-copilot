@@ -18,7 +18,7 @@
   grid-template-rows: repeat(4, 1fr);
   gap: var(--grid-gap);
   justify-items: center;
-  padding: var(--board-padding);
+  /* padding: var(--board-padding); */
   min-width: 0;
   min-height: 0;
   width: var(--pieces-grid-size);

@@ -1,8 +1,9 @@
 /* Global CSS Variables */
 :root {
-  --piece-base-size: min(6vh, 4.5vw);
+  /* controls the amount of vertical space allocated to the board and pieces. everything else should scale from these */
+  --piece-base-size: min(6.4vh, 4.5vw);
   @media (orientation: portrait) {
-    --piece-base-size: 3vh;
+    --piece-base-size: 3.8vh;
   }
   
   /* Basic sizing multipliers */
@@ -333,6 +334,8 @@
 
 .ai-players-modal {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
   gap: calc(var(--piece-base-size) * 0.3);
   margin-bottom: calc(var(--piece-base-size) * 0.3);
   padding: calc(var(--piece-base-size) * 0.25);
@@ -343,10 +346,10 @@
 
 .ai-players-modal > label {
   font-weight: bold;
-  margin-bottom: calc(var(--piece-base-size) * 0.15);
+  margin-bottom: 0;
   display: block;
   color: #333;
-  width: 100%;
+  flex-shrink: 0;
 }
 
 .ai-players-row {
@@ -532,10 +535,6 @@
       "pieces"
       "controls";
     gap: calc(var(--piece-base-size) * 0.1);
-  }
-  
-  .game-board-area {
-    min-height: calc(var(--piece-base-size) * 10);
   }
 
   .app {
