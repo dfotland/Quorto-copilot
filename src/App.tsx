@@ -17,7 +17,7 @@ const TOTAL_PIECES = 16; // Total number of unique pieces
 const INITIAL_PLAYER = 1; // Starting player
 
 // AI Configuration Constants
-const AI_THINKING_DELAY_MS = 500; // Delay before AI makes its move (for better UX)
+const AI_THINKING_DELAY_MS = 700; // Delay before AI makes its move (for better UX)
 
 function App() {
   // Initialize an empty 4x4 board
@@ -169,7 +169,7 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState, currentPlayer, player1AI, player2AI, gamePhase, stagedPiece, availablePieces]);
 
-  // Apply an AI move to the game state
+  // Apply an AI move to the game state (with delay between placement and piece giving)
   const applyAIMove = (aiMove: { placement?: { row: number; col: number } | null; pieceToGive?: PieceAttributes | null }) => {
     console.log(`🔧 Applying AI complete move:`, {
       placement: aiMove.placement,
@@ -191,37 +191,49 @@ function App() {
       setStagedPiece(null); // Clear the staged piece after placing
       
       console.log(`✅ STEP 1 COMPLETE - Piece placed, staged piece cleared`);
+      
+      // If there's a piece to give, add delay before STEP 2
+      if (aiMove.pieceToGive) {
+        setTimeout(() => {
+          applyAIMovePart2(aiMove.pieceToGive!);
+        }, AI_THINKING_DELAY_MS);
+        return; // Exit here to wait for the timeout
+      }
     } else if (aiMove.placement && !stagedPiece) {
       console.log(`❌ STEP 1 FAILED - Cannot place piece, no staged piece available`);
     } else if (!aiMove.placement && stagedPiece) {
       console.log(`🔄 STEP 1 SKIPPED - No placement specified (first move of game)`);
     }
 
-    // STEP 2: Handle piece giving (give piece to opponent)
+    // If no placement or no piece to give, handle piece giving immediately
     if (aiMove.pieceToGive) {
-      console.log(`🎁 STEP 2 - AI Player ${currentPlayer} giving piece to Player ${currentPlayer === 1 ? 2 : 1}`);
-      console.log(`🔍 PIECE DETAILS - Given piece: ${formatPieceForLogging(aiMove.pieceToGive)} (height:${aiMove.pieceToGive.height}, color:${aiMove.pieceToGive.color}, shape:${aiMove.pieceToGive.shape}, top:${aiMove.pieceToGive.top})`);
-      console.log(`🔍 This piece will be staged for Player ${currentPlayer === 1 ? 2 : 1} to place`);
-      
-      // Set the new staged piece (should be null from step 1, so no override warning)
-      setStagedPiece(aiMove.pieceToGive);
-      console.log(`✅ NEW STAGED PIECE SET: ${formatPieceForLogging(aiMove.pieceToGive)}`);
-      
-      // Remove the given piece from available pieces
-      const newAvailablePieces = availablePieces.filter(
-        p => !arePiecesEqual(p, aiMove.pieceToGive!)
-      );
-      setAvailablePieces(newAvailablePieces);
-      
-      // Switch to next player and set them to place phase
-      setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
-      setGamePhase('place');
-      
-      console.log(`✅ STEP 2 COMPLETE - Piece given, switched to Player ${currentPlayer === 1 ? 2 : 1} in place phase`);
-    } else {
-      console.log(`🏁 STEP 2 SKIPPED - No piece to give (game ending move)`);
+      applyAIMovePart2(aiMove.pieceToGive);
     }
     
+    console.log(`🎯 ======= AI COMPLETE MOVE FINISHED =======\n`);
+  };
+
+  // STEP 2: Handle piece giving (separated for delay functionality)
+  const applyAIMovePart2 = (pieceToGive: PieceAttributes) => {
+    console.log(`🎁 STEP 2 - AI Player ${currentPlayer} giving piece to Player ${currentPlayer === 1 ? 2 : 1}`);
+    console.log(`🔍 PIECE DETAILS - Given piece: ${formatPieceForLogging(pieceToGive)} (height:${pieceToGive.height}, color:${pieceToGive.color}, shape:${pieceToGive.shape}, top:${pieceToGive.top})`);
+    console.log(`🔍 This piece will be staged for Player ${currentPlayer === 1 ? 2 : 1} to place`);
+    
+    // Set the new staged piece (should be null from step 1, so no override warning)
+    setStagedPiece(pieceToGive);
+    console.log(`✅ NEW STAGED PIECE SET: ${formatPieceForLogging(pieceToGive)}`);
+    
+    // Remove the given piece from available pieces
+    const newAvailablePieces = availablePieces.filter(
+      p => !arePiecesEqual(p, pieceToGive)
+    );
+    setAvailablePieces(newAvailablePieces);
+    
+    // Switch to next player and set them to place phase
+    setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+    setGamePhase('place');
+    
+    console.log(`✅ STEP 2 COMPLETE - Piece given, switched to Player ${currentPlayer === 1 ? 2 : 1} in place phase`);
     console.log(`🎯 ======= AI COMPLETE MOVE FINISHED =======\n`);
   };
 
@@ -230,6 +242,8 @@ function App() {
     console.log(`🤖 Basic AI (Player ${currentPlayer}) is thinking... [Execution #${executionCountRef.current}]`);
     
     const aiInput: AIInput = {
+      currentPlayer,
+      gamePhase,
       board,
       pieceToPlace: stagedPiece,
       availablePieces,
