@@ -11,13 +11,21 @@ type GamePhase = 'place' | 'give';
 type Player = 1 | 2;
 type GameState = 'playing' | 'won' | 'tie';
 
+// Game Configuration Constants
+const BOARD_SIZE = 4; // 4x4 game board
+const TOTAL_PIECES = 16; // Total number of unique pieces
+const INITIAL_PLAYER = 1; // Starting player
+
+// AI Configuration Constants
+const AI_THINKING_DELAY_MS = 500; // Delay before AI makes its move (for better UX)
+
 function App() {
   // Initialize an empty 4x4 board
   const [board, setBoard] = useState<(PieceAttributes | null)[][]>(
-    Array(4).fill(null).map(() => Array(4).fill(null))
+    Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null))
   );
   
-  // Start with all 16 pieces available
+  // Start with all pieces available
   const [availablePieces, setAvailablePieces] = useState<PieceAttributes[]>(generateAllPieces());
   
   // Track the piece in the staging area (selected by current player for opponent to place)
@@ -27,7 +35,7 @@ function App() {
   const [selectedPiece, setSelectedPiece] = useState<PieceAttributes | null>(null);
   
   // Track current player and game phase
-  const [currentPlayer, setCurrentPlayer] = useState<Player>(1);
+  const [currentPlayer, setCurrentPlayer] = useState<Player>(INITIAL_PLAYER);
   const [gamePhase, setGamePhase] = useState<GamePhase>('give');
   
   // AI controls
@@ -118,11 +126,11 @@ function App() {
   };
 
   const startNewGame = () => {
-    setBoard(Array(4).fill(null).map(() => Array(4).fill(null)));
+    setBoard(Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null)));
     setAvailablePieces(generateAllPieces());
     setSelectedPiece(null);
     setStagedPiece(null);
-    setCurrentPlayer(1);
+    setCurrentPlayer(INITIAL_PLAYER);
     setGamePhase('give'); // First player starts by giving a piece
     setGameState('playing');
     setWinner(null);
@@ -264,7 +272,7 @@ function App() {
       const timer = setTimeout(() => {
         executeAIMove();
         pendingExecutionRef.current = false;
-      }, 500); // Small delay for better UX
+      }, AI_THINKING_DELAY_MS); // AI thinking delay for better UX
 
       return () => {
         clearTimeout(timer);
@@ -321,7 +329,7 @@ function App() {
 
         {/* Available Pieces - Right 2 columns, middle row */}
         <div className="available-pieces-area">
-          <h3>Available Pieces ({availablePieces.length}/16)</h3>
+          <h3>Available Pieces ({availablePieces.length}/{TOTAL_PIECES})</h3>
           <PieceSet
             availablePieces={availablePieces}
             selectedPiece={selectedPiece}

@@ -352,12 +352,6 @@
   flex-shrink: 0;
 }
 
-.ai-players-row {
-  display: flex;
-  gap: calc(var(--piece-base-size) * 0.3);
-  justify-content: space-around;
-}
-
 .ai-player-modal {
   display: flex;
   align-items: center;
@@ -450,28 +444,6 @@
   padding: calc(var(--piece-base-size) * 0.25);
   background: rgba(240, 248, 255, 0.5);
   margin-bottom: calc(var(--piece-base-size) * 0.3);
-}
-
-.demo-section {
-  text-align: center;
-  padding-top: calc(var(--piece-base-size) * 0.25);
-  border-top: 1px solid #eee;
-}
-
-.demo-button {
-  padding: calc(var(--piece-base-size) * 0.15) calc(var(--piece-base-size) * 0.3);
-  background: linear-gradient(45deg, #6f42c1, #563d7c);
-  color: white;
-  border: none;
-  border-radius: calc(var(--piece-base-size) * 0.1);
-  font-size: var(--font-small);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.demo-button:hover {
-  transform: translateY(calc(var(--piece-base-size) * -0.03));
-  box-shadow: 0 calc(var(--piece-base-size) * 0.06) calc(var(--piece-base-size) * 0.12) rgba(111, 66, 193, 0.3);
 }
 
 /* Rules and About Modal Content Styles */

@@ -1,6 +1,27 @@
 import { type PieceAttributes } from './components/Piece';
 import { checkWinCondition, formatPieceForLogging } from './utils/gameUtils';
 
+// Game Board Constants
+const BOARD_SIZE = 4; // 4x4 game board
+
+// AI Difficulty Random Move Chances
+const EASY_RANDOM_CHANCE = 0.4; // 40% chance of random moves
+const NORMAL_RANDOM_CHANCE = 0.2; // 20% chance of random moves  
+const HARD_RANDOM_CHANCE = 0.05; // 5% chance of random moves
+const BRUTAL_RANDOM_CHANCE = 0; // 0% chance of random moves (always optimal)
+
+// AI Win Check Miss Probabilities (chance to miss obvious wins)
+const EASY_WIN_MISS_CHANCE = 0.2; // 20% chance to miss winning moves
+const NORMAL_WIN_MISS_CHANCE = 0.05; // 5% chance to miss winning moves
+const HARD_WIN_MISS_CHANCE = 0.01; // 1% chance to miss winning moves
+const BRUTAL_WIN_MISS_CHANCE = 0; // 0% chance to miss winning moves
+
+// AI Minimum Safe Pieces Thresholds (pieces that don't give opponent immediate wins)
+const EASY_MIN_SAFE_PIECES = 2;
+const NORMAL_MIN_SAFE_PIECES = 2;
+const HARD_MIN_SAFE_PIECES = 3;
+const BRUTAL_MIN_SAFE_PIECES = 8;
+
 export interface BoardPosition {
   row: number;
   col: number;
@@ -27,17 +48,12 @@ export interface AIOutput {
  */
 function getRandomChance(difficulty: 'easy' | 'normal' | 'hard' | 'brutal'): number {
   switch (difficulty) {
-    case 'easy': return 0.4;     // 40% chance of random moves
-    case 'normal': return 0.2;   // 20% chance of random moves  
-    case 'hard': return 0.05;    // 5% chance of random moves
-    case 'brutal': return 0;      // 0% chance of random moves (always optimal)
-    default: return 0.2;
+    case 'easy': return EASY_RANDOM_CHANCE;
+    case 'normal': return NORMAL_RANDOM_CHANCE;
+    case 'hard': return HARD_RANDOM_CHANCE;
+    case 'brutal': return BRUTAL_RANDOM_CHANCE;
+    default: return NORMAL_RANDOM_CHANCE;
   }
-}
-
-export interface BoardPosition {
-  row: number;
-  col: number;
 }
 
 export interface AIMove {
@@ -51,8 +67,8 @@ export interface AIMove {
 function getEmptyPositions(board: (PieceAttributes | null)[][]): BoardPosition[] {
   const emptyPositions: BoardPosition[] = [];
   
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 4; col++) {
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    for (let col = 0; col < BOARD_SIZE; col++) {
       if (board[row][col] === null) {
         emptyPositions.push({ row, col });
       }
@@ -138,10 +154,10 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
 
   // Map difficulty levels to win check skip probabilities
   const winCheckSkipMap: Record<'easy' | 'normal' | 'hard' | 'brutal', number> = {
-    easy: 0.2,
-    normal: 0.05,
-    hard: 0.01,
-    brutal: 0
+    easy: EASY_WIN_MISS_CHANCE,
+    normal: NORMAL_WIN_MISS_CHANCE,
+    hard: HARD_WIN_MISS_CHANCE,
+    brutal: BRUTAL_WIN_MISS_CHANCE
   };
   
   const shouldSkipWinCheck = Math.random() < winCheckSkipMap[difficulty];
@@ -184,11 +200,11 @@ export function makeAIPlacement(input: AIInput): BoardPosition | null {
   // Set minimum safe pieces threshold based on difficulty
   const getMinSafePieces = (difficulty: 'easy' | 'normal' | 'hard' | 'brutal'): number => {
     switch (difficulty) {
-      case 'easy': return 2;
-      case 'normal': return 2;
-      case 'hard': return 3;
-      case 'brutal': return 8;
-      default: return 2;
+      case 'easy': return EASY_MIN_SAFE_PIECES;
+      case 'normal': return NORMAL_MIN_SAFE_PIECES;
+      case 'hard': return HARD_MIN_SAFE_PIECES;
+      case 'brutal': return BRUTAL_MIN_SAFE_PIECES;
+      default: return NORMAL_MIN_SAFE_PIECES;
     }
   };
 

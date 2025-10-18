@@ -2,6 +2,9 @@ import React from 'react';
 import Piece, { type PieceAttributes } from './Piece';
 import './GameBoard.css';
 
+// Game Configuration Constants
+const BOARD_SIZE = 4; // 4x4 game board
+
 interface GameBoardProps {
   onCellClick?: (row: number, col: number) => void;
   board?: (PieceAttributes | null)[][];
@@ -45,8 +48,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ onCellClick, board, winningLine, 
 
   return (
     <div className="board-grid">
-      {Array.from({ length: 4 }, (_, rowIndex) =>
-        Array.from({ length: 4 }, (_, colIndex) => renderCell(rowIndex, colIndex))
+      {Array.from({ length: BOARD_SIZE }, (_, rowIndex) =>
+        Array.from({ length: BOARD_SIZE }, (_, colIndex) => renderCell(rowIndex, colIndex))
       )}
     </div>
   );
