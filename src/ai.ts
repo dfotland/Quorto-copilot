@@ -4,17 +4,17 @@ import { checkWinCondition, formatPieceForLogging } from './utils/gameUtils';
 // Game Board Constants
 const BOARD_SIZE = 4; // 4x4 game board
 
-// AI Difficulty Random Move Chances
-const EASY_RANDOM_CHANCE = 0.4; // 40% chance of random moves
-const NORMAL_RANDOM_CHANCE = 0.2; // 20% chance of random moves  
-const HARD_RANDOM_CHANCE = 0.05; // 5% chance of random moves
-const BRUTAL_RANDOM_CHANCE = 0; // 0% chance of random moves (always optimal)
-
 // AI Win Check Miss Probabilities (chance to miss obvious wins)
-const EASY_WIN_MISS_CHANCE = 0.2; // 20% chance to miss winning moves
-const NORMAL_WIN_MISS_CHANCE = 0.05; // 5% chance to miss winning moves
-const HARD_WIN_MISS_CHANCE = 0.01; // 1% chance to miss winning moves
-const BRUTAL_WIN_MISS_CHANCE = 0; // 0% chance to miss winning moves
+const EASY_WIN_MISS_CHANCE = 0.5; 
+const NORMAL_WIN_MISS_CHANCE = 0.2; 
+const HARD_WIN_MISS_CHANCE = 0.05; 
+const BRUTAL_WIN_MISS_CHANCE = 0; 
+
+// AI Difficulty Random move or random piece to giveChances
+const EASY_RANDOM_CHANCE = 0.4; 
+const NORMAL_RANDOM_CHANCE = 0.2;   
+const HARD_RANDOM_CHANCE = 0.1; 
+const BRUTAL_RANDOM_CHANCE = 0; 
 
 // AI Minimum Safe Pieces Thresholds (pieces that don't give opponent immediate wins)
 const EASY_MIN_SAFE_PIECES = 2;
@@ -287,7 +287,7 @@ export function makeAIPieceSelection(input: AIInput): PieceAttributes | null {
     if (enableLogging) {
       console.log(`🎲 Basic AI (${difficulty}): Randomly selected ${formatPieceForLogging(randomPiece)}`);
     }
-    return randomPiece;
+    return randomPiece; // Random selection to give opponent
   }
 
   if (enableLogging) {
