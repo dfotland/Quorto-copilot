@@ -510,21 +510,21 @@ function App() {
               <div className="rules-section">
                 <h4>Game Setup</h4>
                 <ul>
-                  <li>There are 16 unique pieces, each with 4 different attributes:</li>
+                  <li>There are 16 pieces, each with unique combination of the following attributes:</li>
                   <li><strong>Height:</strong> Tall or Short</li>
                   <li><strong>Color:</strong> Light or Dark</li>
-                  <li><strong>Shape:</strong> Circle or Square</li>
-                  <li><strong>Top:</strong> Smooth or Split</li>
+                  <li><strong>Shape:</strong> Ellipse or Rectangle</li>
+                  <li><strong>Split:</strong> Solid or Divided</li>
                 </ul>
               </div>
               
               <div className="rules-section">
                 <h4>How to Play</h4>
                 <ol>
-                  <li><strong>Give Phase:</strong> The current player selects a piece from the available pieces for their opponent to place.</li>
-                  <li><strong>Place Phase:</strong> The opponent places the given piece on any empty square on the 4×4 board.</li>
-                  <li>Players alternate between giving and placing pieces.</li>
-                  <li>The game continues until someone wins or the board is full (tie).</li>
+                  <li><strong>The first move:</strong> Player 1 selects one piece and gives it to Player 2.</li>
+                  <li><strong>Remaining moves:</strong> The current player places his piece on any empty square. Then, selects a piece from the available pieces and gives it to their opponent.</li>
+                  <li>If a player creates a line of four pieces that share at least one common attribute, they win!</li>
+                  <li>The game continues until someone wins or the board is full (after 16 moves), which is a tie.</li>
                 </ol>
               </div>
               
@@ -539,8 +539,12 @@ function App() {
               </div>
               
               <div className="rules-section">
-                <h4>Strategy Tip</h4>
-                <p>Try to avoid giving your opponent a piece that could complete a winning line, while setting up your own winning opportunities!</p>
+                <h4>Strategy Tips</h4>
+                <ul>
+                  <li>Avoid giving your opponent a piece that could complete a winning line.</li>
+                  <li>Place your piece to limit your opponent's choices. Force them to give you a piece that helps your strategy.</li>
+                  <li>Unless someone misses a winning move, the game is usually decided in the last few moves. Spend extra time thinking as the game nears the end.</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -564,17 +568,17 @@ function App() {
             <div className="modal-content">
               <div className="about-section">
                 <h4>About the Game</h4>
-                <p>Quarto is a strategic board game invented by Blaise Müller in 1991. It's a game of logic and pattern recognition where players must think several moves ahead to avoid giving their opponent a winning opportunity.</p>
+                <p>Quarto is a strategic board game invented by Blaise Müller in 1991. It's a game of logic and pattern recognition where players must think ahead to avoid giving their opponent a winning piece.</p>
               </div>
               
               <div className="about-section">
                 <h4>About This App</h4>
                 <p>QuAIto is a digital implementation of Quarto that features:</p>
                 <ul>
-                  <li><strong>Human vs Human:</strong> Play against a friend locally</li>
-                  <li><strong>AI Opponents:</strong> Challenge yourself against computer players</li>
-                  <li><strong>Basic AI:</strong> Uses heuristic-based decision making with configurable difficulty levels that adjust strategic thinking and randomness with minimal lookahead</li>
-                </ul>
+                  <li><strong>AI Opponent:</strong> Four levels of difficulty. The game will start on easy mode. The AI will go first and give you a piece to play.</li>
+                  <li><strong>AI controls</strong> Use the AI configuration to choose players(s) for the AI</li>
+                  <li><strong>The AI:</strong> Uses heuristic-based decision making with configurable difficulty levels that adjust strategic thinking and randomness with minimal lookahead</li>
+                  <li><strong>Human vs Human:</strong> Turn of the AI player  to play against a friend locally</li>                </ul>
               </div>
               
               <div className="about-section">
@@ -584,16 +588,6 @@ function App() {
                   <li>React 19 with TypeScript</li>
                   <li>Vite for fast development</li>
                   <li>CSS Grid for responsive layout</li>
-                </ul>
-              </div>
-              
-              <div className="about-section">
-                <h4>Tips for Playing</h4>
-                <ul>
-                  <li>Study the available pieces before making your selection</li>
-                  <li>Try the different AI difficulty levels to improve your skills</li>
-                  <li>Don't give your opponent a piece they can play to win</li>
-                  <li>Place your piece to limit your opponent's choices</li>
                 </ul>
               </div>
               
