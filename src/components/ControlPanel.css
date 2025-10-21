@@ -16,7 +16,7 @@
   font-weight: bold;
   width: 100%;
   height: 100%;
-  margin: var(--spacing-medium);
+  /* margin: var(--spacing-medium); */
 }
 
 .new-game-button {
@@ -61,10 +61,12 @@
   .new-game-button {
     font-size: var(--font-medium);
     padding: var(--spacing-small) var(--spacing-small);
+    margin: var(--spacing-medium);
   }
 
   .ai-config-button {
     font-size: var(--font-medium);
     padding: var(--spacing-small) var(--spacing-small);
+    margin: var(--spacing-medium);
   }
 }

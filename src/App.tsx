@@ -556,7 +556,7 @@ function App() {
         <div className="modal-overlay" onClick={() => setShowAbout(false)}>
           <div className="about-modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>About QuAIto 0.91 Beta</h3>
+              <h3>About QuAIto 0.92 Beta</h3>
               <button 
                 className="close-button" 
                 onClick={() => setShowAbout(false)}
